@@ -1,8 +1,6 @@
 import numpy as np
 
-
 class MyImage:
-
     def __init__(self, dim):
         self.dim = dim
         self.pixel = dim[0] * dim[0]
@@ -20,20 +18,21 @@ class MyImage:
         return orig
 
     def predict(self, img, ERROR_THRESHOLD):
-        results = []
-        keyResults = {}
+        listResults = []
+        dictResults = {}
         for i in range(6):
             print(self.lable[i], end=": ")
             matches = self.imgCheck(img, self.image[i])
-            results.append(matches)
-            keyResults[self.lable[i]] = matches
-            print("matches", matches, "of", str(self.pixel))
-        maxVal = max(results)
-        maxi = results.index(maxVal)
+            listResults.append(matches)
+            dictResults[self.lable[i]] = matches
+            percent = "(" + str(int((matches / self.pixel) * 100)) + "%)"
+            print("matches", matches, "of", str(self.pixel), percent)
+        maxVal = max(listResults)
+        maxi = listResults.index(maxVal)
         predicted_image = self.lable[maxi]
         if maxVal < ERROR_THRESHOLD:
             predicted_image = "error"
-        return results, keyResults, predicted_image
+        return listResults, dictResults, predicted_image
 
 
     def imgCheck(self, img1, img2):

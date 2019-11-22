@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class MyImage:
     def __init__(self, dim):
         self.dim = dim
@@ -10,12 +11,12 @@ class MyImage:
             tempImg = self.gen6Img(dim, self.lable[i])
             self.image.append(tempImg)
 
-    def getOriginal(self, img_lable):
-        orig = "Not found"
+    def getPerfect(self, img_lable):
+        per = "Not found"
         for i in range(6):
             if self.lable[i] == img_lable:
-                orig = self.image[i]
-        return orig
+                per = self.image[i]
+        return per
 
     def predict(self, img, ERROR_THRESHOLD):
         print("---- prediction results ----")
@@ -27,7 +28,8 @@ class MyImage:
             listResults.append(matches)
             percent = int((matches / self.pixel) * 100)
             dictResults[self.lable[i]] = percent
-            print("matches", matches, "of", str(self.pixel), "(" + str(int((matches / self.pixel) * 100)) + "%)")
+            print("matches", matches, "of", str(self.pixel),
+                  "(" + str(int((matches / self.pixel) * 100)) + "%)")
         maxVal = max(listResults)
         maxi = listResults.index(maxVal)
         predicted_image = self.lable[maxi]
@@ -35,14 +37,13 @@ class MyImage:
             predicted_image = "error"
         return listResults, dictResults, predicted_image
 
-
     def imgCheck(self, img1, img2):
         lenght = img1.shape[0]
         matches = 0
         for y in range(lenght):
             for x in range(lenght):
                 if img1[y][x] == img2[y][x]:
-                    matches += 1;
+                    matches += 1
         return matches
 
     def gen6Img(self, dimention, type):
@@ -65,7 +66,7 @@ class MyImage:
                     check = True
                 if type == "lower" and r >= c:
                     check = True
-                
+
                 if check:
                     buff[r][c] = 255
         return buff

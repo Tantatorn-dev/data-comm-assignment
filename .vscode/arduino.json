@@ -1,0 +1,6 @@
+{
+    "sketch": "DrZIn-Dev\\PC_1_Flow\\PC_1.ino",
+    "board": "arduino:avr:nano",
+    "configuration": "cpu=atmega328",
+    "port": "COM20"
+}

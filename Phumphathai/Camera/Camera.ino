@@ -561,7 +561,7 @@ void arduinoUnoInut(void) {
   OCR2A = 0;//(F_CPU)/(2*(X+1))
   DDRC &= ~15;//low d0-d3 camera
   DDRD &= ~252;//d7-d4 and interrupt pins
-  _delay_ms(3000);
+  _delay_ms(1000);
 
   //set up twi for 100khz
   TWSR &= ~3;//disable prescaler for TWI
@@ -586,27 +586,51 @@ void StringPgm(const char * str) {
 
 static void captureImg(uint16_t wg, uint16_t hg) {
   uint16_t y, x;
+  uint8_t buf[320];
 
+  while (!(PIND & 8)); //wait for high  -> vsync
   StringPgm(PSTR("*RDY*"));
-
-  while (!(PIND & 8));//wait for high
-  while ((PIND & 8));//wait for low
-
+  while ((PIND & 8)); //wait for low  -> vsync
+  
+  
   y = hg;
   while (y--) {
     x = wg;
-    //while (!(PIND & 256));//wait for high
+    uint8_t*b=buf,*b2=buf;
+    
+    while (!(PINB & 1)); //wait for high  -> href
+    
     while (x--) {
-      while ((PIND & 4));//wait for low
-      UDR0 = (PINC & 15) | (PIND & 240);
-      while (!(UCSR0A & (1 << UDRE0)));//wait for byte to transmit
-      while (!(PIND & 4));//wait for high
-      while ((PIND & 4));//wait for low
-      while (!(PIND & 4));//wait for high
+      while ((PIND & 4)){ //wait for low  -> pclk
+        if (!(UCSR0A & (1 << UDRE0)) && b2 < b) {
+          UDR0 = *b2++;
+        }
+      }
+      *b++ = (PINC & 15) | (PIND & 240); // get only first byte
+      while (!(PIND & 4)){ //wait for high  -> pclk
+        if (!(UCSR0A & (1 << UDRE0)) && b2 < b) {
+          UDR0 = *b2++;
+        }
+      }
+      while ((PIND & 4)){ //wait for low  -> pclk
+        if (!(UCSR0A & (1 << UDRE0)) && b2 < b) {
+          UDR0 = *b2++;
+        }
+      }
+      while (!(PIND & 4)){ //wait for high  -> pclk
+        if (!(UCSR0A & (1 << UDRE0)) && b2 < b) {
+          UDR0 = *b2++;
+        }
+      }
     }
-    //  while ((PIND & 256));//wait for low
+    
+    while ((PINB & 1)); //wait for low  -> href
+    
+    while(b2 < b){
+      UDR0 = *b2++;
+      while(!( UCSR0A & (1<<UDRE0)));//wait for byte to transmit
+    }
   }
-  // _delay_ms(100);
 }
 
 void setup() {
@@ -614,12 +638,15 @@ void setup() {
   camInit();
   setRes();
   setColor();
-  wrReg(0x11, 11); //Earlier it had the value: wrReg(0x11, 12); New version works better for me :) !!!!
+  wrReg(0x11, 0x80 | 3); //Earlier it had the value: wrReg(0x11, 12); New version works better for me :) !!!!
+  StringPgm(PSTR("*RDY*"));
 }
 
 
 void loop() {
-  captureImg(160, 120);
   while (!(UCSR0A & (1 << RXC0)));
   char a = UDR0;
+  a++;
+  captureImg(160, 120);
+  
 }

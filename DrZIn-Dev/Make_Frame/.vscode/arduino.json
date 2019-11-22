@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:nano",
+    "configuration": "cpu=atmega328",
+    "port": "COM20",
+    "sketch": "example_make_frame.ino"
+}

@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:nano",
+    "configuration": "cpu=atmega328",
+    "sketch": "example_CRC.ino",
+    "port": "COM20"
+}

@@ -52,7 +52,7 @@ uint8_t bitC = 0;
 pc2_fm_state state = AWAITING_PC1;
 
 char data_pc2 = 0;
-char  pos[6];
+char  pos[3];
 char  angle[3];
 bool isRotationStart = false;
 
@@ -63,6 +63,7 @@ void loop() {
     receiveFM();
   }
   else if (state == AWAITING_PC2) {
+    // rotate camera and receive values
     receiveSerialPC2();
   }
   else if (state == SENDING_PC1) {
@@ -126,19 +127,45 @@ void receiveSerialPC2() {
   if (Serial.available() > 0) {
     data_pc2 = Serial.read();
     if (data_pc2 == 's') {
-      Serial.print("test");
       isRotationStart = true;
     }
   }
-
+  bool isAtLeft=false,isAtMid=false,isAtRight=false;
   if (isRotationStart) {
+    isAtLeft = true;
     rotate_camera('l');
-    delay(5000);
-    rotate_camera('m');
-    delay(5000);
-    rotate_camera('r');
-    delay(5000);
-    isRotationStart = false;
+    angle[0] = 7;
+    while(isAtLeft){
+      if(Serial.available()>0){
+          data_pc2 = Serial.read();
+        }
+      if(data_pc2 != 0) {
+        pos[0] = data_pc2;
+        rotate_camera('m');
+        isAtLeft = false;
+        isAtMid = true;
+        }
+    }
+    while(isAtMid){
+      if(Serial.available()>0){
+          data_pc2 = Serial.read();
+        }
+      if(data_pc2 != 0) {
+        pos[1] = data_pc2;
+        rotate_camera('r');
+        isAtMid = false;
+        isAtRight = true;
+        }
+    }
+    while(isAtRight){
+      if(Serial.available()>0){
+          data_pc2 = Serial.read();
+        }
+      if(data_pc2 != 0) {
+        pos[2] = data_pc2;
+        isAtRight = false;
+        }
+    } 
   }
 }
 

@@ -68,7 +68,7 @@ def getImageData():
     print("Processing Image...")
     img24, img4 = preProcessImage()
     images = MyImage(img24.shape)
-    listResults, dictResults, predicted = images.predict(img24, np.uint8(0.7 * img24.size))
+    listResults, dictResults, predicted = images.predict(img24, np.uint8(0.75 * img24.size))
     print("image found is ", end="")
     print(predicted)
     typeByte = getDictBytes(predicted)

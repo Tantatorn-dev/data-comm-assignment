@@ -61,7 +61,7 @@ img4 = thresh4
 images = MyImage(dim24)
 
 print("=== prediction results ===")
-results, key, predicted = images.predict(thresh24, int(0.7 * thresh24.size))
+results, key, predicted = images.predict(thresh24, int(0.8 * thresh24.size))
 print(results)
 print(key)
 print("The image found is", end=" ")

@@ -3,7 +3,7 @@ import numpy as np
 class MyImage:
     def __init__(self, dim):
         self.dim = dim
-        self.pixel = dim[0] * dim[0]
+        self.pixel = dim[0] * dim[1]
         self.lable = ['top', 'bottom', 'left', 'right', 'upper', 'lower']
         self.image = []
         for i in range(6):
@@ -18,15 +18,16 @@ class MyImage:
         return orig
 
     def predict(self, img, ERROR_THRESHOLD):
+        print("---- prediction results ----")
         listResults = []
         dictResults = {}
         for i in range(6):
             print(self.lable[i], end=": ")
             matches = self.imgCheck(img, self.image[i])
             listResults.append(matches)
-            dictResults[self.lable[i]] = matches
-            percent = "(" + str(int((matches / self.pixel) * 100)) + "%)"
-            print("matches", matches, "of", str(self.pixel), percent)
+            percent = int((matches / self.pixel) * 100)
+            dictResults[self.lable[i]] = percent
+            print("matches", matches, "of", str(self.pixel), "(" + str(int((matches / self.pixel) * 100)) + "%)")
         maxVal = max(listResults)
         maxi = listResults.index(maxVal)
         predicted_image = self.lable[maxi]
@@ -52,24 +53,19 @@ class MyImage:
         for r in range(row):
             for c in range(col):
                 check = False
-                if type == "top":
-                    if r+1 <= half:
-                        check = True
-                if type == "bottom":
-                    if r+1 > half:
-                        check = True
-                if type == "left":
-                    if c+1 <= half:
-                        check = True
-                if type == "right":
-                    if c+1 > half:
-                        check = True
-                if type == "upper":
-                    if c >= r:
-                        check = True
-                if type == "lower":
-                    if r >= c:
-                        check = True
+                if type == "top" and r+1 <= half:
+                    check = True
+                if type == "bottom" and r+1 > half:
+                    check = True
+                if type == "left" and c+1 <= half:
+                    check = True
+                if type == "right" and c+1 > half:
+                    check = True
+                if type == "upper" and c >= r:
+                    check = True
+                if type == "lower" and r >= c:
+                    check = True
+                
                 if check:
                     buff[r][c] = 255
         return buff

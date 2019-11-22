@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 from matplotlib import pyplot as plt
 from my_image import MyImage
+import traceback
 
 def getLatestFile(path):
     files = os.listdir(path)
@@ -39,9 +40,8 @@ def getLatesImgType():
     retVal, thresh = cv2.threshold(mapped, 80, 255, cv2.THRESH_BINARY) 
 
     # second threshold for 24 x 24 image
-    x = 24
-    dim = (x, x)
-    resize24 = cv2.resize(thresh, dim)
+    dim24 = (24, 24)
+    resize24 = cv2.resize(thresh, dim24)
     retValV2, thresh24 = cv2.threshold(resize24, 150, 255, cv2.THRESH_BINARY)
 
     # final threshold for 4 x 4 image
@@ -90,21 +90,19 @@ def main(arduino):
 
     sendImgType(arduino, dictBytes[predicted])
 
-
-arduino = serial.Serial()
-arduino.port = 'COM11'
-arduino.baudrate = 115200
-arduino.timeout = 1
-arduino.open()
-time.sleep(2)
-
 try: 
+    arduino = serial.Serial()
+    arduino.port = 'COM11'
+    arduino.baudrate = 115200
+    arduino.timeout = 1
+    arduino.open()
+    time.sleep(2)
     main(arduino)
 except KeyboardInterrupt:
     print("\nkeyboard is interrupted")
     print("program stopped.")
+except Exception:
+    print("An error occurred")
+    print(traceback.print_exc())
+finally:
     arduino.close()
-# except Exception as e:
-#     print("An error occur")
-#     print(e)
-    #arduino.close()

@@ -1,28 +1,22 @@
 #include <Servo.h>
-Servo servoPan;
-Servo servoTilt;
+Servo myservo; //ประกาศตัวแปรแทน Servoกำหนดข
+Servo myservo2;
 void setup()
 {
-  Serial.begin(115200);
-  servoPan.attach(7);
-  servoTilt.attach(8);
-  
-  servoTilt.write(50);
-  servoPan.write(70);
+myservo.attach(7); // กำหนดขา 9 ควบคุม Servo
+myservo2.attach(8);
+myservo2.write(70);
+myservo.write(98);
 }
 void loop()
 {
-  if (Serial.available()) {
-    char in = Serial.read();
-    if (in == 'a') {
-      servoTilt.write(71);
-      servoPan.write(43);
-    } else if (in == 'b') {
-      servoTilt.write(66);
-      servoPan.write(98);
-    } else if (in == 'c') {
-      servoTilt.write(66);
-      servoPan.write(140);
-    }
-  }
+  myservo2.write(71);
+  myservo.write(43); // สั่งให้ Servo หมุนไปองศาที่ 0
+  delay(20000); // หน่วงเวลา 1000ms
+  myservo2.write(66);
+  myservo.write(98); // สั่งให้ Servo หมุนไปองศาที่ 90
+  delay(20000); // หน่วงเวลา 1000ms
+  myservo2.write(66);
+  myservo.write(140); // สั่งให้ Servo หมุนไปองศาที่ 180
+  delay(20000); // หน่วงเวลา 1000ms
 }

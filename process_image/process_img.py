@@ -2,7 +2,7 @@ import os
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
-from gen_image import MyImage
+from my_image import MyImage
 
 
 path = 'C:\\out'
@@ -29,11 +29,9 @@ def mapImg(img):
             newImg[r][c] = newVal
     return newImg
 
-n = 4
-mapped = mapImg(cv2.resize(gray, (gray.shape[1] // n,gray.shape[0] // n)))
+mapped = mapImg(gray)
 
-threshold_value = 80
-retVal, thresh = cv2.threshold(mapped, threshold_value, 255, cv2.THRESH_BINARY)
+retVal, thresh = cv2.threshold(mapped, 80, 255, cv2.THRESH_BINARY)
 print('thresh image shape: ' + str(thresh.shape))
 
 x = 24
@@ -50,7 +48,8 @@ ret, thresh4 = cv2.threshold(resize4, 150, 255, cv2.THRESH_BINARY)
 # Predicting image
 images = MyImage(dim)
 
-results, key, predicted = images.predict(thresh24, 400)
+print("=== prediction results ===")
+results, key, predicted = images.predict(thresh24, int(0.7 * thresh24.size))
 print(results)
 print(key)
 print("The image found is", end=" ")
@@ -89,7 +88,8 @@ plt.title('thresh 16 pixel'), plt.xticks([]), plt.yticks([])
 plt.subplot(pos+8),plt.imshow(thresh4, cmap = 'gray')
 plt.title('thresh 16 pixel v 2'), plt.xticks([]), plt.yticks([])
 
-plt.subplot(pos+9),plt.imshow(orig, cmap = 'gray')
-plt.title('original image'), plt.xticks([]), plt.yticks([])
+if predicted != "error":
+    plt.subplot(pos+9),plt.imshow(orig, cmap = 'gray')
+    plt.title('original image'), plt.xticks([]), plt.yticks([])
 
 plt.show()

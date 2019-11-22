@@ -1,5 +1,7 @@
 {
     "board": "arduino:avr:nano",
     "configuration": "cpu=atmega328old",
-    "sketch": "CRC\\example_CRC.ino"
+    "sketch": "CRC\\example_CRC.ino",
+    "programmer": "ArduinoISP",
+    "port": "COM20"
 }

@@ -1,21 +1,22 @@
-import serial
-import time
+
 import os
-import numpy as np
 import cv2
-from matplotlib import pyplot as plt
+import numpy as np
 from my_image import MyImage
-import traceback
 
 def getLatestFile(path):
+    path = "C:\\out"
+    os.chdir(path)
     files = os.listdir(path)
+    files.sort(key=lambda x: os.path.getmtime(x))
     return files[-1]
 
-def getLatesImgType():
+def preProcessImage():
     # get latest image
     path = 'C:\\out'
-    #fileName = getLatestFile(path)
-    fileName = "out92.bmp"
+    fileName = getLatestFile(path)
+    print("Latest file is", fileName)
+    #fileName = "out92.bmp"
     image = cv2.imread(path + "\\" + fileName)
 
     # reduce noise and convert to gray scale
@@ -54,32 +55,10 @@ def getLatesImgType():
 
     return img24, img4
 
-def sendImgType(arduino, byte_type):
-    time.sleep(0.1)
-    print("sending img byte to arduino")
-    arduino.write(byte_type.encode('ascii'))
-    while True:
-        if arduino.inWaiting():
-            raw = arduino.read_until()
-            print("data from arduino: ", end="")
-            print(raw.decode("ascii"))
-            arduino.close()
-            break
 
-def main(arduino):
-    img24, img4 = getLatesImgType()
-    dim = (24, 24)
-    images = MyImage(dim)
-
-    listResults, dictResults, predicted = images.predict(img24, int(0.7 * img24.size))
-    #print(listResults)
-    #print(dictResults)
-    print("==== predicted result ===")
-    print(predicted)
-
-    # char for sending to arduino
-
+def getDictBytes(key):
     dictBytes = {
+        "error": '0',
         "top": '1',
         "bottom": '2',
         "left": '3',
@@ -88,21 +67,17 @@ def main(arduino):
         "lower": '6'
     }
 
-    sendImgType(arduino, dictBytes[predicted])
+    return dictBytes[key]
 
-try: 
-    arduino = serial.Serial()
-    arduino.port = 'COM11'
-    arduino.baudrate = 115200
-    arduino.timeout = 1
-    arduino.open()
-    time.sleep(2)
-    main(arduino)
-except KeyboardInterrupt:
-    print("\nkeyboard is interrupted")
-    print("program stopped.")
-except Exception:
-    print("An error occurred")
-    print(traceback.print_exc())
-finally:
-    arduino.close()
+def getImageData():
+    print("Processing Image...")
+    img24, img4 = preProcessImage()
+    images = MyImage(img24.shape)
+    listResults, dictResults, predicted = images.predict(img24, np.uint8(0.7 * img24.size))
+    print("image found is ", end="")
+    print(predicted)
+    typeByte = getDictBytes(predicted)
+    print("send back is", typeByte)
+    return typeByte
+
+getImageData()

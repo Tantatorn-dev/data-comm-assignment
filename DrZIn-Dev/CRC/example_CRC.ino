@@ -1,3 +1,5 @@
+#include "FastCRC/FastCRC.h"
+
 void setup()
 {
 }

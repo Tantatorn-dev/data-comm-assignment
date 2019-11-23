@@ -6,6 +6,19 @@ import serial
 from camera import Camera
 from image import getImageData
 
+import os
+import shutil
+folder = './out/'
+for the_file in os.listdir(folder):
+    file_path = os.path.join(folder, the_file)
+    try:
+        if os.path.isfile(file_path):
+            os.unlink(file_path)
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)
+    except Exception as e:
+        print('Failed to delete %s. Reason: %s' % (file_path, e))
+
 ser = serial.Serial()
 ser.port = 'COM15'
 ser.baudrate = 115200
@@ -35,5 +48,5 @@ while True:
                 Err = True
                 continue
             ser.write(typeByte.encode('ascii'))
-            cam.save(img, 'out\\' + str(i) + '.png')
+            cam.save(img, 'out/' + str(i) + '.png')
             i = i+1

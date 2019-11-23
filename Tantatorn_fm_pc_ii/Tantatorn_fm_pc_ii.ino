@@ -56,6 +56,11 @@ void loop()
          if(i==0) rotate_camera('l');
          else if(i==1) rotate_camera('m');
          else if(i==2) rotate_camera('r');
+         capture();
+         while (!Serial.available())
+      ;
+         char dataIn2 = Serial.read();
+         transmitter->sendFM(dataIn2);
       }
     }
     
@@ -86,7 +91,7 @@ void receiveSerialPC2()
   delay(400);
   while (isAtLeft)
   {
-    Serial.println("c");
+    capture();
     while (!Serial.available())
       ;
     data_pc2 = Serial.read();
@@ -102,7 +107,7 @@ void receiveSerialPC2()
   delay(400);
   while (isAtMid)
   {
-    Serial.println("c");
+    capture();
     while (!Serial.available())
       ;
     data_pc2 = Serial.read();
@@ -118,7 +123,7 @@ void receiveSerialPC2()
   delay(400);
   while (isAtRight)
   {
-    Serial.println("c");
+    capture();
     while (!Serial.available())
       ;
     data_pc2 = Serial.read();
@@ -130,6 +135,11 @@ void receiveSerialPC2()
     }
   }
   state = SENDING_PC1;
+}
+
+
+void capture(){
+  Serial.println('c');
 }
 
 void rotate_camera(char direction_camera)

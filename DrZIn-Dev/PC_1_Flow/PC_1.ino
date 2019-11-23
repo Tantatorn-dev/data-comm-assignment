@@ -46,8 +46,7 @@ uint8_t ne = '9';     // 45
 uint8_t flag = 2;
 //? Default data
 
-void sentFrame(uint8_t *data, uint8_t size);
-
+void sentFrame(uint8_t *data, uint8_t size);                     //!
 void makeFrame(uint8_t *buffer, uint8_t *data, uint8_t size);    //!
 void makeCRC(uint8_t *buffer, uint8_t *base, uint8_t size_base); //!
 int isError();
@@ -60,13 +59,13 @@ void userInput();
 void makeCommand();
 void printResult();
 void analyzeData();
-void sentOneData(char in);
+void sentOneData(char in);     //!
 void setVoltage(uint16_t vol); //!
 void wireBegin();              // !
 void initFreq();               // !
 void initSinDac();             // !
 void FM_Begin();               // !
-
+void ReceiveOneData();
 // ! in comment => implemented
 void setup()
 {

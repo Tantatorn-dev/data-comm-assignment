@@ -34,12 +34,14 @@ void FM_Tx::sendFM(char in[]) {
     transmit(in[i++]);
   }
   setVoltage(2047);
+  delay(200);
 }
 
 void FM_Tx::sendFM(char in)
 {
   transmit(in);
   setVoltage(2047);
+  delay(200);
 }
 
 void FM_Tx::transmit(char in)

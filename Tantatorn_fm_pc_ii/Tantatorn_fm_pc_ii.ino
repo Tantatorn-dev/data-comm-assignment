@@ -22,11 +22,8 @@ void setup()
 }
 
 // Global variables
-
-char data_pc2 = 0;
 char pos[4] = {0, 0, 0, 0};
-char angle[3];
-bool isRotationStart = false;
+char lastServoPosition = 'a';
 
 void loop()
 {
@@ -41,6 +38,7 @@ void loop()
   {
     // rotate camera and receive values
     receiveSerialPC2();
+    state = SENDING_PC1;
   }
   else if (state == SENDING_PC1)
   {
@@ -50,23 +48,25 @@ void loop()
   else if (state == LAST_STATE)
   {
     char dataIn = receiver->receiveFM();
-    for (int i = 0; i < 3; i++)
+    if (dataIn != 0)
     {
-      if(dataIn == pos[i]){
-         if(i==0) rotate_camera('l');
-         else if(i==1) rotate_camera('m');
-         else if(i==2) rotate_camera('r');
-         capture();
-         while (!Serial.available())
-      ;
-         char dataIn2 = Serial.read();
-         transmitter->sendFM(dataIn2);
+      for (int i = 0; i < 3; i++)
+      {
+        if (dataIn == pos[i]) {
+          char dataIn2;
+          if     (i == 0) dataIn2 = captureAt('l');
+          else if (i == 1) dataIn2 = captureAt('m');
+          else if (i == 2) dataIn2 = captureAt('r');
+
+          transmitter->sendFM(dataIn2);
+        }
       }
-    }
-    
-    // reset system
-    if(dataIn=='r'){
-      state = AWAITING_PC1;
+
+      // reset system
+      if (dataIn == 'r')
+      {
+        state = AWAITING_PC1;
+      }
     }
   }
 }
@@ -83,80 +83,54 @@ void initServo()
 
 void receiveSerialPC2()
 {
-  char data_pc2 = 0;
-  bool isAtLeft = false, isAtMid = false, isAtRight = false;
-  isAtLeft = true;
-  rotate_camera('l');
-  angle[0] = 7;
-  delay(400);
-  while (isAtLeft)
-  {
-    capture();
-    while (!Serial.available())
-      ;
-    data_pc2 = Serial.read();
-    if (data_pc2 != 0)
-    {
-      pos[0] = data_pc2;
-      rotate_camera('m');
-      isAtLeft = false;
-      isAtMid = true;
-      data_pc2 = 0;
-    }
-  }
-  delay(400);
-  while (isAtMid)
-  {
-    capture();
-    while (!Serial.available())
-      ;
-    data_pc2 = Serial.read();
-    if (data_pc2 != 0)
-    {
-      pos[1] = data_pc2;
-      rotate_camera('r');
-      isAtMid = false;
-      isAtRight = true;
-      data_pc2 = 0;
-    }
-  }
-  delay(400);
-  while (isAtRight)
-  {
-    capture();
-    while (!Serial.available())
-      ;
-    data_pc2 = Serial.read();
-    if (data_pc2 != 0)
-    {
-      pos[2] = data_pc2;
-      isAtRight = false;
-      data_pc2 = 0;
-    }
-  }
-  state = SENDING_PC1;
+  pos[0] = captureAt('l');
+  pos[1] = captureAt('m');
+  pos[2] = captureAt('r');
 }
 
+char captureAt(char direction_camera)
+{
+  rotate_camera(direction_camera);
+  return capture();
+}
 
-void capture(){
-  Serial.println('c');
+char capture()
+{
+  while (true)
+  {
+    Serial.println('c');
+    while (!Serial.available())
+      ;
+    char data_pc2 = Serial.read();
+    if (data_pc2 != 0)
+    {
+      return data_pc2;
+    }
+  }
 }
 
 void rotate_camera(char direction_camera)
 {
   switch (direction_camera)
   {
-  case 'l':
-    servoTilt.write(70);
-    servoPan.write(145);
-    break;
-  case 'm':
-    servoTilt.write(66);
-    servoPan.write(91);
-    break;
-  case 'r':
-    servoTilt.write(71);
-    servoPan.write(50);
-    break;
+    case 'l':
+      servoTilt.write(69);
+      servoPan.write(141);
+      break;
+    case 'm':
+      if (lastServoPosition == 'l') {
+        servoTilt.write(70);
+        servoPan.write(94);
+      } else if (lastServoPosition == 'r') {
+        servoTilt.write(70);
+        servoPan.write(105);
+      }
+      break;
+    case 'r':
+      servoTilt.write(71);
+      servoPan.write(47);
+      break;
   }
+  lastServoPosition = direction_camera;
+  delay(200);
 }

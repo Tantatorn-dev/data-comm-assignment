@@ -9,13 +9,13 @@ class FM_Tx
 {
 public:
     FM_Tx();
-    void sendFM();
-    void setVoltage(uint16_t);
+    void sendFM(char data);
 private:
     int delay0;
     float S[NUM_SAMPLE];
     uint16_t S_DAC[NUM_SAMPLE];
 
+    void setVoltage(uint16_t);
     uint16_t freq[NUM_FREQ];
     uint16_t freqDelay[NUM_FREQ];
 };

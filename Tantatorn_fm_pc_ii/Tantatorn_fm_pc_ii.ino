@@ -1,11 +1,13 @@
 #include "pc_ii_state.h"
 #include "FM_Rx.h"
+#include "FM_Tx.h"
 
 #include <Servo.h>
 Servo servoPan;
 Servo servoTilt;
 
 FM_Rx * receiver;
+FM_Tx * transmitter;
 
 void setup() {
 
@@ -13,6 +15,7 @@ void setup() {
   Serial.flush();
 
   receiver = new FM_Rx();
+  transmitter = new FM_Tx();
 
   Wire.begin();
   
@@ -116,8 +119,4 @@ void rotate_camera(char direction_camera) {
       servoPan.write(43);
       break;
   }
-}
-
-void sendFM(){
-  
 }

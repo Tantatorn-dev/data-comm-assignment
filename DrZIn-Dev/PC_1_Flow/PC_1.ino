@@ -117,7 +117,7 @@ void setup()
         //startError == isError();
         if (!startError)
         {
-            ReceiveData();
+            //ReceiveData(firstData, sizeof(firstData));
             analyzeFirstData();
             printData();
             break;

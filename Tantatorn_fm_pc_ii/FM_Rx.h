@@ -14,18 +14,12 @@
 class FM_Rx
 {
 public:
-    FM_Rx();
-    char receiveFM();
-    int8_t zone(uint16_t);
+  FM_Rx(float freq);
+  char receiveFM(unsigned long timeout = 2000);
+    
 
 private:
-    TEA5767Radio radio = TEA5767Radio();
+  TEA5767Radio radio = TEA5767Radio();
 
-    int prev = 0;
-    int check2 = false;
-    int count = 0;
-    uint32_t startFreq = 0;
-    char data = 0;
-    uint8_t bitC = 0;
-
+  int8_t zone(uint16_t);
 };

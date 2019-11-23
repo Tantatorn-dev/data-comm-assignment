@@ -36,37 +36,27 @@ void FM_Tx::setVoltage(uint16_t vol)
     Wire.endTransmission();
 }
 
-void FM_Tx::sendFM()
+void FM_Tx::sendFM(char in)
 {
-    if (Serial.available() > 0)
+    int input[4];
+    input[0] = (in >> 0) & B0011;
+    input[1] = (in >> 2) & B0011;
+    input[2] = (in >> 4) & B0011;
+    input[3] = (in >> 6) & B0011;
+
+    for (int k = 3; k >= 0; k--)
     {
-        char in = Serial.read();
-        Serial.println(in);
-        if (in == 's')
+        for (int cycle = freq[input[k]] / FREQ_DIFF; cycle > 0; cycle--)
         {
-            //state = 2;
-
-            int input[4];
-            input[0] = (in >> 0) & B0011;
-            input[1] = (in >> 2) & B0011;
-            input[2] = (in >> 4) & B0011;
-            input[3] = (in >> 6) & B0011;
-
-            for (int k = 3; k >= 0; k--)
+            for (int sample = 0; sample < NUM_SAMPLE; sample++)
             {
-                for (int cycle = freq[input[k]] / FREQ_DIFF; cycle > 0; cycle--)
-                {
-                    for (int sample = 0; sample < NUM_SAMPLE; sample++)
-                    {
-                        setVoltage(S_DAC[sample]);
-                        delayMicroseconds(freqDelay[input[k]]);
-                    }
-                }
-            }
-            if (Serial.available() == 0)
-            {
-                setVoltage(2047.5);
+                setVoltage(S_DAC[sample]);
+                delayMicroseconds(freqDelay[input[k]]);
             }
         }
+    }
+    if (Serial.available() == 0)
+    {
+        setVoltage(2047.5);
     }
 }

@@ -55,8 +55,4 @@ void FM_Tx::sendFM(char in)
             }
         }
     }
-    if (Serial.available() == 0)
-    {
-        setVoltage(2047.5);
-    }
 }

@@ -589,8 +589,9 @@ static void captureImg(uint16_t wg, uint16_t hg) {
   uint8_t buf[320];
 
   while (!(PIND & 8)); //wait for high  -> vsync
-  while ((PIND & 8)); //wait for low  -> vsync
   StringPgm(PSTR("*RDY*"));
+  while ((PIND & 8)); //wait for low  -> vsync
+  
   
   y = hg;
   while (y--) {
@@ -638,11 +639,14 @@ void setup() {
   setRes();
   setColor();
   wrReg(0x11, 0x80 | 3); //Earlier it had the value: wrReg(0x11, 12); New version works better for me :) !!!!
+  StringPgm(PSTR("*RDY*"));
 }
 
 
 void loop() {
-  captureImg(160, 120);
   while (!(UCSR0A & (1 << RXC0)));
   char a = UDR0;
+  a++;
+  captureImg(160, 120);
+  
 }

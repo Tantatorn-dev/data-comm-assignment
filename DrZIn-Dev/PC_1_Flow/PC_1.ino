@@ -5,6 +5,8 @@
 // TODO: Test init Freq
 // TODO: Test init Sin Dac
 // TODO: Test FM Begin
+// TODO: Test Sent one Data
+// TODO: Test sentFrame
 
 #include <Arduino.h>
 #include <Wire.h>

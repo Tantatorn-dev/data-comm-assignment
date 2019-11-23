@@ -86,7 +86,7 @@ void receiveSerialPC2()
   delay(400);
   while (isAtLeft)
   {
-    Serial.println("a");
+    Serial.println("c");
     while (!Serial.available())
       ;
     data_pc2 = Serial.read();
@@ -102,7 +102,7 @@ void receiveSerialPC2()
   delay(400);
   while (isAtMid)
   {
-    Serial.println("b");
+    Serial.println("c");
     while (!Serial.available())
       ;
     data_pc2 = Serial.read();

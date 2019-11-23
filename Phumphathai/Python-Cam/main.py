@@ -31,6 +31,9 @@ while True:
         cam.display(img)
         if not Err:
             typeByte = getImageData(img)
+            if typeByte == '0':
+                Err = True
+                continue
             ser.write(typeByte.encode('ascii'))
             cam.save(img, 'out\\4' + str(i) + '.png')
             i = i+1

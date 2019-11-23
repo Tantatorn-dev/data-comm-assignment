@@ -1,3 +1,5 @@
+// todo: Test userInput
+
 #include <FastCRC.h>
 
 FastCRC8 CRC8;

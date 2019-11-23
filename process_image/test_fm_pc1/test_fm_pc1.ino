@@ -8,13 +8,13 @@ FM_Tx * transmitter;
 //------ Global Variable -----
 enum STATES
 {
-   START = 1, GET_3DATA
+  START = 1, GET_3DATA, LAST_STATE
 };
 
 enum STATES state  = START;
 
 String lable[6] = {"Top", "Bottom", "Left", "Right", "Upper", "Lower"};
-int angle[3] = {-45, 0, 45};
+int angle[3] = { -45, 0, 45};
 char pos[3];
 
 void setup() {
@@ -24,41 +24,42 @@ void setup() {
   receiver = new FM_Rx(97);
   transmitter = new FM_Tx();
 }
+
 void showAll() {
   Serial.println("--Data received--");
   for (int j = 0; j < 3; j++) {
     int lableIndex = int(pos[j]) - 49;
     String imgType = lable[lableIndex];
-    Serial.println(String(j+1)+ ". " + imgType + " at " + String(angle[j]) + " degree");
+    Serial.println(String(j + 1) + ". " + imgType + " at " + String(angle[j]) + " degree");
   }
   Serial.println();
 }
 
-void start(){
-  while(state == START){
+void start() {
+  while (state == START) {
     Serial.print("Press \'s\' for get 3 image types from PC2: ");
-    while(!Serial.available());
+    while (!Serial.available());
     char in = Serial.read();
     Serial.println(in);
-    if (in == 's'){
+    if (in == 's') {
       Serial.println("Sending \'s\' to PC2...");
       transmitter->sendFM(in);
       state = GET_3DATA;
       delay(300);
     }
-    else{
+    else {
       Serial.println("wrong input please try again!\n");
     }
   }
-  
+
 }
 
 
-void get3DataFromPC2(){
+void get3DataFromPC2() {
   Serial.println("Getting 3 data from PC2...");
   uint32_t t = millis();
   int i = 0;
-  while(i != 3){
+  while (i != 3) {
     char receive = receiver->receiveFM();
     if (receive != 0) {
       Serial.print(receive);
@@ -67,24 +68,69 @@ void get3DataFromPC2(){
       if (i == 3) {
         Serial.println();
         showAll();
-        state = START;
+        state = LAST_STATE;
         delay(300);
       }
     }
-    if(millis() - t > 15000){
+    if (millis() - t > 15000) {
       Serial.println("Time out of 15 seconds");
       state = START;
       break;
     }
-  } 
+  }
+}
+
+
+void lastState() {
+  while (state == LAST_STATE) {
+    Serial.print("Choose Image ");
+
+    for(int i=0; i<3; i++){
+        char key = pos[i];
+        int lableIndex = int(key) - 49;
+        String imgType = lable[lableIndex];
+        Serial.print(" *");
+        Serial.print(imgType);
+        Serial.print("(");
+        Serial.print(key);
+        Serial.print(")");
+        Serial.print("* ");
+    }
+    Serial.println(" (press \'r\' to reset)");
+    while (!Serial.available());
+    char in = Serial.read();
+    Serial.println(in);
+    if (in == '1' or in == '2' or in == '3' or in == '4' or in == '5' or in == '6' or in == 'r') {
+      Serial.print("Sending ");
+      Serial.print(in);
+      Serial.println(" to PC2\n");
+      transmitter->sendFM(in);
+      if(in == 'r')
+        state = START;
+      delay(300);
+    }
+    else {
+      Serial.println("wrong input please try again!\n");
+    }
+  }
+
+  //  while(true){
+  //    char receive = receiver->receiveFM();
+  //    if (in == '1' or in == '2' or in == '3' or in == '4' or in == '5' or in == '6') {
+  //      Serial.println(receive);
+  //      break;
+  //    }
+  //  }
+
 }
 
 
 void loop() {
   if (state == START) {
     start();
-  }else if(state == GET_3DATA){
+  } else if (state == GET_3DATA) {
     get3DataFromPC2();
+  } else if (state == LAST_STATE) {
+    lastState();
   }
-
 }

@@ -23,6 +23,7 @@ class Camera:
         while not self.isImageStart():
             pass
         print("finish init camera")
+        cv2.startWindowThread()
 
     def read(self):
         raw = self.serial.read()
@@ -61,8 +62,16 @@ class Camera:
 
     def display(self, img):
         if img is not None:
+
+            a = np.copy(img)
+            y2 = int(a.shape[0]/2)
+            x2 = int(a.shape[1]/2)
+            for y in range(a.shape[0]):
+                a[y, x2] = [255]
+            for x in range(a.shape[1]):
+                a[y2, x] = [255]
             cv2.destroyWindow('camera output')
-            cv2.imshow('camera output', img)
+            cv2.imshow('camera output', a)
             cv2.waitKey(1)
 
     def save(self, img, saveat):

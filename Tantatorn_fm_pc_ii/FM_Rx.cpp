@@ -7,6 +7,7 @@ FM_Rx::FM_Rx(float freq)
   cbi(ADCSRA, ADPS1);
   cbi(ADCSRA, ADPS0);
 
+  Wire.begin();
   radio.setFrequency(freq);
 }
 
@@ -49,21 +50,25 @@ char FM_Rx::receiveFM(unsigned long timeout)
       {
         if (check2 == true && micros() - startFreq > 3500)
         {
-          data <<= 2;
-          data |= (count - 2) & B0011;
-          bitC++;
-          if (bitC == 4)
+          if (2 <= count && count <= 5)
           {
-            // Serial.print((char)data);
-            if (data != 0)
+            data <<= 2;
+            data |= (count - 2) & B0011;
+            bitC++;
+            if (bitC == 4)
             {
-                return data;
+              // Serial.print((char)data);
+              if (data != 0)
+              {
+                  return data;
+              }
+              data = 0;
+              bitC = 0;
             }
-            data = 0;
-            bitC = 0;
           }
           check2 = false;
           count = 0;
+          
         }
       }
       prev = tmpZone;

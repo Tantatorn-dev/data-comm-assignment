@@ -1,7 +1,7 @@
 #include <Arduino.h>
-#include "Wire.h"
+#include <Wire.h>
 
-#define NUM_SAMPLE 4
+#define NUM_SAMPLE 8
 #define NUM_FREQ 4
 #define FREQ_DIFF 250
 

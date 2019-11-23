@@ -14,7 +14,7 @@ void setup() {
   Serial.begin(115200);
   Serial.flush();
 
-  receiver = new FM_Rx();
+  receiver = new FM_Rx(93.44);
   transmitter = new FM_Tx();
 
   Wire.begin();
@@ -53,7 +53,7 @@ void initServo() {
   servoPan.attach(7);
   servoTilt.attach(8);
 
-  rotate_camera('r')
+  rotate_camera('r');
 }
 
 

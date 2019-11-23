@@ -22,29 +22,44 @@ class MyImage:
         print("---- prediction results ----")
         listResults = []
         dictResults = {}
+        blackTops = 0
+        blackBottoms = 0
         for i in range(6):
             print(self.lable[i], end=": ")
-            matches = self.imgCheck(img, self.image[i])
+            matches, blackTops, blackBottoms = self.imgCheck(
+                img, self.image[i])
             listResults.append(matches)
             percent = int((matches / self.pixel) * 100)
             dictResults[self.lable[i]] = percent
             print("matches", matches, "of", str(self.pixel),
                   "(" + str(int((matches / self.pixel) * 100)) + "%)")
+
         maxVal = max(listResults)
         maxi = listResults.index(maxVal)
         predicted_image = self.lable[maxi]
-        if maxVal < ERROR_THRESHOLD:
+        if predicted_image == "top" and blackTops > 50:
+            predicted_image = "upper"
+        elif predicted_image == "bottom" and blackBottoms > 50:
+            predicted_image = "lower"
+
+        if dictResults[predicted_image] < ERROR_THRESHOLD:
             predicted_image = "error"
         return listResults, dictResults, predicted_image
 
     def imgCheck(self, img1, img2):
         lenght = img1.shape[0]
         matches = 0
+        blackTops = 0
+        blackBottoms = 0
         for y in range(lenght):
             for x in range(lenght):
                 if img1[y][x] == img2[y][x]:
                     matches += 1
-        return matches
+                if img1[y][x] == 0 and y < 10:
+                    blackTops += 1
+                if img1[y][x] == 0 and y > 12:
+                    blackBottoms += 1
+        return matches, blackTops, blackBottoms
 
     def gen6Img(self, dimention, type):
         buff = np.zeros(dimention, np.uint8)

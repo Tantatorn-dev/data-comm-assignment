@@ -79,8 +79,7 @@ void initServo() {
   servoPan.attach(7);
   servoTilt.attach(8);
 
-  servoTilt.write(50);
-  servoPan.write(70);
+  rotate_camera('r')
 }
 
 void receiveFM() {
@@ -171,16 +170,16 @@ void receiveSerialPC2() {
 void rotate_camera(char direction_camera) {
   switch (direction_camera) {
     case 'l':
-      servoTilt.write(66);
-      servoPan.write(140);
+      servoTilt.write(70);
+      servoPan.write(145);
       break;
     case 'm':
       servoTilt.write(66);
-      servoPan.write(98);
+      servoPan.write(91);
       break;
     case 'r':
       servoTilt.write(71);
-      servoPan.write(43);
+      servoPan.write(47);
       break;
   }
 }

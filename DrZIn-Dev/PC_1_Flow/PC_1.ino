@@ -7,6 +7,9 @@
 // TODO: Test FM Begin
 // TODO: Test Sent one Data
 // TODO: Test sentFrame
+// TODO: Test ReceiveOneData
+// TODO: Test Is error
+
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #endif
@@ -22,11 +25,11 @@ FastCRC8 CRC8;
 
 // ! Receive define
 #define r_slope 20
-int prev = 0;
+char data = 0;
 int check2 = false;
 int count = 0;
+int prev = 0;
 uint32_t startFreq = 0;
-char data = 0;
 uint8_t bitC = 0;
 // ! Receive define
 
@@ -48,7 +51,14 @@ boolean commandError = true;
 // ? Flow Control
 
 //? Data Frame
-uint8_t startFrame[3];
+uint8_t startCRC[sizeof(startData) + 1];
+uint8_t startFrame[sizeof(startCRC) + 2];
+uint8_t errorData;
+uint8_t checkError;
+uint8_t firstData[6];
+
+uint8_t ReceiveCount = 0;
+uint8_t ReceiveError[sizeof(uint8_t) + 1];
 // ? Data Frame
 
 //? Default data
@@ -68,7 +78,7 @@ uint8_t flag = 2;
 void sentFrame(uint8_t *data, uint8_t size);                     //!
 void makeFrame(uint8_t *buffer, uint8_t *data, uint8_t size);    //!
 void makeCRC(uint8_t *buffer, uint8_t *base, uint8_t size_base); //!
-int isError();
+int isError();                                                   //!
 void ReceiveData();
 void print(uint8_t *buffer, uint8_t size); //!
 void printData();
@@ -87,6 +97,9 @@ void FM_Begin();               // !
 uint8_t ReceiveOneData();      //!
 void Receive_Begin();          //!
 int8_t zone(uint16_t val);     //!
+void analyzeFirstData();
+int CRCcheckError(uint8_t *buffer, uint8_t size);
+
 // ! in comment => implemented
 void setup()
 {
@@ -98,13 +111,14 @@ void setup()
     //userStart();
     while (startError)
     {
-        //makeCRC();
-        //makeFrame();
-        //sentFrame();
-        startError == isError();
+        //makeCRC(startCRC, startData, sizeof(startData));
+        //makeFrame(startFrame, startCRC, sizeof(startCRC));
+        //sentFrame(startFrame, sizeof(sentFrame));
+        //startError == isError();
         if (!startError)
         {
             ReceiveData();
+            analyzeFirstData();
             printData();
             break;
         }
@@ -258,19 +272,15 @@ uint8_t ReceiveOneData()
     return temp;
 }
 
-void ReceiveData()
+void analyzeFirstData()
 {
 }
 
-void printData()
+void ReceiveData(uint8_t *buffer, uint8_t size)
 {
-}
-
-int isError()
-{
-    uint8_t count = 0;
-    uint8_t errorData;
-    while (count != uint8_t(2))
+    uint8_t idx = 0;
+    uint8_t dataWithCRC[size + 1];
+    while (ReceiveCount != uint8_t(2))
     {
         uint8_t temp = ReceiveOneData();
         if (temp == flag)
@@ -279,11 +289,35 @@ int isError()
         }
         else
         {
-            errorData = temp;
-            break;
+            dataWithCRC[idx] = temp;
+            idx++;
         }
     }
-    return uint8_t(errorData);
+    //Reset Counter
+    ReceiveCount = 0;
+    if (CRCcheckError(dataWithCRC, sizeof(dataWithCRC)))
+    {
+        //Sent something
+    }
+    else
+    {
+        //copy data with crc to buffer and cut CRCchecksum
+        for (int i = 0; i < size; i++)
+        {
+            buffer[i] = dataWithCRC[i]
+        }
+    }
+}
+
+void printData()
+{
+}
+
+int isError()
+{
+
+    ReceiveData(errorData, sizeof(errorData));
+    return errorData;
 }
 
 void clearData()
@@ -304,6 +338,16 @@ void printResult()
 
 void analyzeData()
 {
+}
+
+int CRCcheckError(uint8_t *buffer, uint8_t size)
+{
+    uint8_t checkError = CRC8.smbus(buffer, size);
+    if (checkError == uint8_t(0))
+    {
+        return 0;
+    }
+    return 1;
 }
 
 void makeCRC(uint8_t *buffer, uint8_t *base, uint8_t size_base)

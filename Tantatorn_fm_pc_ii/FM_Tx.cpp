@@ -2,27 +2,18 @@
 
 FM_Tx::FM_Tx()
 {
-  Wire.setClock(400000UL);
+  Wire.begin();
+  Wire.setClock(800000UL);
   for (int i = 0; i < NUM_FREQ; i++)
   {
     freq[i] = (i + 2) * FREQ_DIFF;
-    freqDelay[i] = ((1000000 / freq[i]) / NUM_SAMPLE) - 110;
-    Serial.print(freq[i]);
-    Serial.print(" ");
-    Serial.print(freqDelay[i]);
-    Serial.print(" ");
-    Serial.print(freq[i] / FREQ_DIFF);
-    Serial.println();
+    freqDelay[i] = ((1000000 / freq[i]) / NUM_SAMPLE) - 75;
   }
 
   for (int i = 0; i < NUM_SAMPLE; i++)
   {
     S[i] = sin(DEG_TO_RAD * 360.0 / NUM_SAMPLE * i);
     S_DAC[i] = S[i] * 2047.5 + 2047.5;
-    Serial.print(S[i]);
-    Serial.print(" ");
-    Serial.print(S_DAC[i]);
-    Serial.println();
   }
 
   setVoltage(2047);
@@ -43,12 +34,14 @@ void FM_Tx::sendFM(char in[]) {
     transmit(in[i++]);
   }
   setVoltage(2047);
+  delay(200);
 }
 
 void FM_Tx::sendFM(char in)
 {
   transmit(in);
   setVoltage(2047);
+  delay(200);
 }
 
 void FM_Tx::transmit(char in)

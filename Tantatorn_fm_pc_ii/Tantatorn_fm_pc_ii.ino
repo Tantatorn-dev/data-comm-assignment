@@ -14,10 +14,8 @@ void setup() {
   Serial.begin(115200);
   Serial.flush();
 
-  receiver = new FM_Rx(93.44);
+  receiver = new FM_Rx(106.54);
   transmitter = new FM_Tx();
-
-  Wire.begin();
   
   initServo();
 }
@@ -25,7 +23,7 @@ void setup() {
 // Global variables
 
 char data_pc2 = 0;
-char  pos[3];
+char  pos[4] = {0,0,0,0};
 char  angle[3];
 bool isRotationStart = false;
 
@@ -41,7 +39,8 @@ void loop() {
     receiveSerialPC2();
   }
   else if (state == SENDING_PC1) {
-    
+    transmitter->sendFM(pos);
+    state = AWAITING_PC1;
   }
 
 }
@@ -115,7 +114,7 @@ void rotate_camera(char direction_camera) {
       break;
     case 'r':
       servoTilt.write(71);
-      servoPan.write(47);
+      servoPan.write(50);
       break;
   }
 }

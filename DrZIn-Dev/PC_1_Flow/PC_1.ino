@@ -50,17 +50,6 @@ boolean startError = true;
 boolean commandError = true;
 // ? Flow Control
 
-//? Data Frame
-uint8_t startCRC[sizeof(startData) + 1];
-uint8_t startFrame[sizeof(startCRC) + 2];
-uint8_t errorData;
-uint8_t checkError;
-uint8_t firstData[6];
-
-uint8_t ReceiveCount = 0;
-uint8_t ReceiveError[sizeof(uint8_t) + 1];
-// ? Data Frame
-
 //? Default data
 uint8_t startData = 's';
 uint8_t top = '1';
@@ -75,11 +64,22 @@ uint8_t ne = '9';     // 45
 uint8_t flag = 2;
 //? Default data
 
+//? Data Frame
+uint8_t startCRC[sizeof(startData) + 1];
+uint8_t startFrame[sizeof(startCRC) + 2];
+uint8_t errorData;
+uint8_t checkError;
+uint8_t firstData[6];
+
+uint8_t ReceiveCount = 0;
+uint8_t ReceiveError[sizeof(uint8_t) + 1];
+// ? Data Frame
+
 void sentFrame(uint8_t *data, uint8_t size);                     //!
 void makeFrame(uint8_t *buffer, uint8_t *data, uint8_t size);    //!
 void makeCRC(uint8_t *buffer, uint8_t *base, uint8_t size_base); //!
 int isError();                                                   //!
-void ReceiveData();
+void ReceiveData(uint8_t *buffer, uint8_t size);
 void print(uint8_t *buffer, uint8_t size); //!
 void printData();
 void clearData();
@@ -118,7 +118,7 @@ void setup()
         if (!startError)
         {
             //ReceiveData(firstData, sizeof(firstData));
-            analyzeFirstData();
+            //analyzeFirstData();
             printData();
             break;
         }
@@ -134,7 +134,7 @@ void setup()
         commandError = isError();
         if (!commandError)
         {
-            ReceiveData();
+            //ReceiveData();
             analyzeData();
             printResult();
             break;
@@ -304,7 +304,7 @@ void ReceiveData(uint8_t *buffer, uint8_t size)
         //copy data with crc to buffer and cut CRCchecksum
         for (int i = 0; i < size; i++)
         {
-            buffer[i] = dataWithCRC[i]
+            buffer[i] = dataWithCRC[i];
         }
     }
 }

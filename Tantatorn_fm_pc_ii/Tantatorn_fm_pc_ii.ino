@@ -26,7 +26,7 @@ void setup() {
   Serial.flush();
 
   Wire.begin();
-  radio.setFrequency(90.04);
+  radio.setFrequency(93.44);
 
   initServo();
 }
@@ -67,8 +67,7 @@ void loop() {
     receiveSerialPC2();
   }
   else if (state == SENDING_PC1) {
-
-
+    
   }
 
 }
@@ -107,7 +106,7 @@ void receiveFM() {
         data_pc1 |= (count - 2) & B0011;
         bitC++;
         if (bitC == 4) {
-          Serial.print((char)data_pc1);
+          // Serial.print((char)data_pc1);
           if (data_pc1 == 's') {   
             state = AWAITING_PC2;
           }
@@ -124,49 +123,49 @@ void receiveFM() {
 
 
 void receiveSerialPC2() {
-  if (Serial.available() > 0) {
-    data_pc2 = Serial.read();
-    if (data_pc2 == 's') {
-      isRotationStart = true;
-    }
-  }
+  char data_pc2 = 0;
   bool isAtLeft=false,isAtMid=false,isAtRight=false;
-  if (isRotationStart) {
-    isAtLeft = true;
-    rotate_camera('l');
-    angle[0] = 7;
-    while(isAtLeft){
-      if(Serial.available()>0){
-          data_pc2 = Serial.read();
-        }
-      if(data_pc2 != 0) {
-        pos[0] = data_pc2;
-        rotate_camera('m');
-        isAtLeft = false;
-        isAtMid = true;
-        }
+  isAtLeft = true;
+  rotate_camera('l');
+  angle[0] = 7;
+  delay(400);
+  while(isAtLeft){
+    Serial.println("a");
+    while(!Serial.available());
+    data_pc2 = Serial.read();
+    if(data_pc2 != 0) {
+      pos[0] = data_pc2;
+      rotate_camera('m');
+      isAtLeft = false;
+      isAtMid = true;
+      data_pc2 = 0;
     }
-    while(isAtMid){
-      if(Serial.available()>0){
-          data_pc2 = Serial.read();
-        }
-      if(data_pc2 != 0) {
-        pos[1] = data_pc2;
-        rotate_camera('r');
-        isAtMid = false;
-        isAtRight = true;
-        }
-    }
-    while(isAtRight){
-      if(Serial.available()>0){
-          data_pc2 = Serial.read();
-        }
-      if(data_pc2 != 0) {
-        pos[2] = data_pc2;
-        isAtRight = false;
-        }
-    } 
   }
+  delay(400);
+  while(isAtMid){
+    Serial.println("b");
+    while(!Serial.available());
+    data_pc2 = Serial.read();
+    if(data_pc2 != 0) {
+      pos[1] = data_pc2;
+      rotate_camera('r');
+      isAtMid = false;
+      isAtRight = true;
+      data_pc2 = 0;
+    }
+  }
+  delay(400);
+  while(isAtRight){
+    Serial.println("c");
+    while(!Serial.available());
+    data_pc2 = Serial.read();
+    if(data_pc2 != 0) {
+      pos[2] = data_pc2;
+      isAtRight = false;
+      data_pc2 = 0;
+    }
+  }
+  state = SENDING_PC1;
 }
 
 void rotate_camera(char direction_camera) {

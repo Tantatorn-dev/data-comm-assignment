@@ -26,6 +26,7 @@ void ReceiveData();
 void print(uint8_t *buffer, uint8_t size);
 void printData();
 void clearData();
+void userStart();
 void userInput();
 void makeCommand();
 void printResult();
@@ -34,6 +35,7 @@ void analyzeData();
 void setup()
 {
     Serial.begin(9600);
+    userStart();
     while (startError)
     {
         //makeCRC();
@@ -144,4 +146,21 @@ void print(uint8_t *buffer, uint8_t size)
         Serial.print(" ");
     }
     Serial.println();
+}
+
+void userStart()
+{
+    while (true)
+    {
+        Serial.println("Press s to start => ");
+        while (!Serial.available())
+        {
+            char temp = Serial.read();
+            if (temp == 's' || temp == 'S')
+            {
+                break;
+            }
+            Serial.println("Invalid Input");
+        }
+    }
 }

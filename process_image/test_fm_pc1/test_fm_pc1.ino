@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <TEA5767Radio.h>
 
+//-----------------TX----------------
 #define NUM_SAMPLE 4
 #define NUM_FREQ 4
 #define FREQ_DIFF 250
@@ -12,6 +13,7 @@ uint16_t S_DAC[NUM_SAMPLE];
 
 uint16_t freq[NUM_FREQ];
 uint16_t freqDelay[NUM_FREQ];
+//----------------------------------
 
 // defines for setting and clearing register bits for RX
 #ifndef cbi
@@ -22,7 +24,7 @@ uint16_t freqDelay[NUM_FREQ];
 #endif
 
 #define r_slope 20
-///////////////////////////////////////////////////
+//------------------------------------------------------
 
 void setVoltage(uint16_t vol)
 {
@@ -37,9 +39,9 @@ void setup()
   Serial.begin(115200);
   Serial.flush();
 
+  //-------------------------TX---------------------------
   Wire.begin();
   Wire.setClock(400000UL);
-
   for (int i = 0; i < NUM_FREQ; i++)
   {
     freq[i] = (i+2) * FREQ_DIFF;
@@ -61,22 +63,29 @@ void setup()
     Serial.print(S_DAC[i]);
     Serial.println();
   }
+  //------------------------------------------------------
+
+  //-------------------------RX---------------------------
   sbi(ADCSRA,ADPS2);
   cbi(ADCSRA,ADPS1);
   cbi(ADCSRA,ADPS0);
   Serial.flush();
+ //------------------------------------------------------
  
   setVoltage(2047.5);
 }
 
 
 int state = 1;
+
+//------------------------TX----------------------------------------------
 void tx(){
     if (Serial.available() > 0)
   {
     char in = Serial.read();
+    Serial.println(in);
     if(in == 's'){
-      state = 1;
+      //state = 2;
     
     int input[4];
     input[0] = (in >> 0) & B0011;
@@ -101,13 +110,13 @@ void tx(){
   }
   }
 }
+//---------------------------------------------------------------------
 
+//----------------------RX---------------------------------------------
 int prev = 0;
 int check2 = false;
 int count = 0;
-
 uint32_t startFreq = 0;
-
 char data = 0;
 uint8_t bitC = 0;
 
@@ -151,7 +160,6 @@ void rx(){
     prev = tmpZone;
   }
 }
-
 
 
 void loop()

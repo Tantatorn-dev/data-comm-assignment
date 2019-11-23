@@ -27,6 +27,7 @@ char data_pc2 = 0;
 char pos[4] = {0, 0, 0, 0};
 char angle[3];
 bool isRotationStart = false;
+char lastServoPosition = 'a';
 
 void loop()
 {
@@ -136,16 +137,22 @@ void rotate_camera(char direction_camera)
   switch (direction_camera)
   {
   case 'l':
-    servoTilt.write(70);
-    servoPan.write(145);
+    servoTilt.write(69);
+    servoPan.write(141);
     break;
   case 'm':
-    servoTilt.write(66);
-    servoPan.write(91);
+    if (lastServoPosition == 'l') {
+        servoTilt.write(70);
+        servoPan.write(94);
+      } else if (lastServoPosition == 'r') {
+        servoTilt.write(70);
+        servoPan.write(105);
+      }
     break;
   case 'r':
     servoTilt.write(71);
-    servoPan.write(50);
+    servoPan.write(47);
     break;
   }
+  lastServoPosition = direction_camera;
 }

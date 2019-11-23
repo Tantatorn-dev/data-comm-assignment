@@ -35,7 +35,5 @@ while True:
                 Err = True
                 continue
             ser.write(typeByte.encode('ascii'))
-            cam.save(img, 'out\\4' + str(i) + '.png')
+            cam.save(img, 'out\\' + str(i) + '.png')
             i = i+1
-            # time.sleep(5)
-    print("A")

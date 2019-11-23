@@ -62,7 +62,7 @@ void receiveSerialPC2() {
   isAtLeft = true;
   rotate_camera('l');
   angle[0] = 7;
-  delay(400);
+  delay(200);
   while(isAtLeft){
     Serial.println("a");
     while(!Serial.available());
@@ -75,7 +75,7 @@ void receiveSerialPC2() {
       data_pc2 = 0;
     }
   }
-  delay(400);
+  delay(200);
   while(isAtMid){
     Serial.println("b");
     while(!Serial.available());
@@ -88,7 +88,7 @@ void receiveSerialPC2() {
       data_pc2 = 0;
     }
   }
-  delay(400);
+  delay(200);
   while(isAtRight){
     Serial.println("c");
     while(!Serial.available());

@@ -26,7 +26,7 @@ void setup() {
 }
 
 void showAll() {
-  Serial.println("--Data received--");
+  Serial.println("--Data received from PC2--");
   for (int j = 0; j < 3; j++) {
     int lableIndex = int(pos[j]) - 49;
     String imgType = lable[lableIndex];
@@ -45,7 +45,6 @@ void start() {
       Serial.println("Sending \'s\' to PC2...");
       transmitter->sendFM(in);
       state = GET_3DATA;
-      delay(300);
     }
     else {
       Serial.println("wrong input please try again!\n");
@@ -83,7 +82,7 @@ void get3DataFromPC2() {
 
 void lastState() {
   while (state == LAST_STATE) {
-    Serial.print("Choose Image ");
+    Serial.print("Choose Image ==>");
 
     for (int i = 0; i < 3; i++) {
       char key = pos[i];
@@ -99,26 +98,32 @@ void lastState() {
     Serial.println(" (press \'r\' to reset)");
     while (!Serial.available());
     char in = Serial.read();
+    Serial.print("Input : ");
     Serial.println(in);
     if (in == '1' or in == '2' or in == '3' or in == '4' or in == '5' or in == '6' or in == 'r') {
       Serial.print("Sending ");
       Serial.print(in);
-      Serial.println(" to PC2\n");
+      Serial.println(" to PC2...");
       transmitter->sendFM(in);
       if (in == 'r'){
+        Serial.println("reset program\n");
         state = START;
         break;
       }
+      uint32_t ti = millis();
       while (true) {
+        if(millis() - ti > 5000){
+          Serial.println("Time out of 5 seconds");
+          break;
+        }
         char receive = receiver->receiveFM();
-        if (in == '1' or in == '2' or in == '3' or in == '4' or in == '5' or in == '6') {
+        if (receive == '1' or receive == '2' or receive == '3' or receive == '4' or receive == '5' or receive == '6') {
           Serial.print("received ");
           Serial.print(receive);
-          Serial.prinln(" from PC2");
+          Serial.println(" from PC2\n");
           break;
         }
       }
-      delay(300);
     }
     else {
       Serial.println("wrong input please try again!\n");

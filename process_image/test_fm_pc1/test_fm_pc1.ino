@@ -85,16 +85,16 @@ void lastState() {
   while (state == LAST_STATE) {
     Serial.print("Choose Image ");
 
-    for(int i=0; i<3; i++){
-        char key = pos[i];
-        int lableIndex = int(key) - 49;
-        String imgType = lable[lableIndex];
-        Serial.print(" *");
-        Serial.print(imgType);
-        Serial.print("(");
-        Serial.print(key);
-        Serial.print(")");
-        Serial.print("* ");
+    for (int i = 0; i < 3; i++) {
+      char key = pos[i];
+      int lableIndex = int(key) - 49;
+      String imgType = lable[lableIndex];
+      Serial.print(" *");
+      Serial.print(imgType);
+      Serial.print("(");
+      Serial.print(key);
+      Serial.print(")");
+      Serial.print("* ");
     }
     Serial.println(" (press \'r\' to reset)");
     while (!Serial.available());
@@ -105,8 +105,19 @@ void lastState() {
       Serial.print(in);
       Serial.println(" to PC2\n");
       transmitter->sendFM(in);
-      if(in == 'r')
+      if (in == 'r'){
         state = START;
+        break;
+      }
+      while (true) {
+        char receive = receiver->receiveFM();
+        if (in == '1' or in == '2' or in == '3' or in == '4' or in == '5' or in == '6') {
+          Serial.print("received ");
+          Serial.print(receive);
+          Serial.prinln(" from PC2");
+          break;
+        }
+      }
       delay(300);
     }
     else {
@@ -114,13 +125,6 @@ void lastState() {
     }
   }
 
-  //  while(true){
-  //    char receive = receiver->receiveFM();
-  //    if (in == '1' or in == '2' or in == '3' or in == '4' or in == '5' or in == '6') {
-  //      Serial.println(receive);
-  //      break;
-  //    }
-  //  }
 
 }
 

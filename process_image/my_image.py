@@ -10,12 +10,12 @@ class MyImage:
             tempImg = self.gen6Img(dim, self.lable[i])
             self.image.append(tempImg)
 
-    def getOriginal(self, img_lable):
-        orig = "Not found"
+    def getPerfect(self, img_lable):
+        per = "Not found"
         for i in range(6):
             if self.lable[i] == img_lable:
-                orig = self.image[i]
-        return orig
+                per = self.image[i]
+        return per
 
     def predict(self, img, ERROR_THRESHOLD):
         print("---- prediction results ----")

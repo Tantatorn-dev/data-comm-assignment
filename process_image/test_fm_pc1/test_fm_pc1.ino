@@ -88,19 +88,18 @@ void get3DataFromPC2() {
 
 void lastState() {
   while (state == LAST_STATE) {
-    Serial.print("Choose Image ==>");
+    Serial.print("Choose Image ==> ");
 
     for (int i = 0; i < 3; i++) {
       char key = pos[i];
       String imgType = getImageType(key);
-      Serial.print(" *");
-      Serial.print(imgType);
-      Serial.print("(");
+      Serial.print("[");
       Serial.print(key);
-      Serial.print(")");
-      Serial.print("* ");
+      Serial.print("]->");
+      Serial.print(imgType);
+      Serial.print(" ");
     }
-    Serial.println(" (press \'r\' to reset)");
+    Serial.println(" [r]->reset program");
     Serial.print("Input : ");
     while (!Serial.available());
     char in = Serial.read();

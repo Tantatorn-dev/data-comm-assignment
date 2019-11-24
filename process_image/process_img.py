@@ -75,9 +75,9 @@ img24, img4 = preProcessImage(originalImage)
 
 myImg = MyImage(img24.shape)
 listResults, dictResults, predictedImage = myImg.predict(img24, 60)
+print("Image found is", predictedImage)
 
 if predictedImage != "error":
-    print("Image found is", predictedImage)
     labelImg = "perfect " + predictedImage.capitalize() + " image24x24"
     perfectImg = myImg.getPerfect(predictedImage)
     imgStacks.append((labelImg, perfectImg))

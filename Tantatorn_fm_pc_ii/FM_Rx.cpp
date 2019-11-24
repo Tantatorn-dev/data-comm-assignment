@@ -21,7 +21,7 @@ char FM_Rx::receiveFM(unsigned long timeout)
   uint32_t startFreq = 0;
   char data = 0;
   uint8_t bitC = 0;
-  
+
   while (millis() - start < timeout || startFreq != 0)
   {
     int8_t tmpZone = zone(analogRead(A2));
@@ -60,7 +60,7 @@ char FM_Rx::receiveFM(unsigned long timeout)
               // Serial.print((char)data);
               if (data != 0)
               {
-                  return data;
+                return data;
               }
               data = 0;
               bitC = 0;
@@ -68,7 +68,6 @@ char FM_Rx::receiveFM(unsigned long timeout)
           }
           check2 = false;
           count = 0;
-          
         }
       }
       prev = tmpZone;
@@ -79,10 +78,10 @@ char FM_Rx::receiveFM(unsigned long timeout)
 
 int8_t FM_Rx::zone(uint16_t val)
 {
-    if (val <= 350)
-        return -1;
-    else if (val <= 600)
-        return 0;
-    else
-        return 1;
+  if (val <= 350)
+    return -1;
+  else if (val <= 600)
+    return 0;
+  else
+    return 1;
 }

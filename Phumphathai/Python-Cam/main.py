@@ -1,13 +1,12 @@
 import time
 import os
+import shutil
 
 import serial
 
 from camera import Camera
 from image import getImageData
 
-import os
-import shutil
 folder = './out/'
 for the_file in os.listdir(folder):
     file_path = os.path.join(folder, the_file)

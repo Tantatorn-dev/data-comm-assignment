@@ -25,19 +25,25 @@ void setup() {
   transmitter = new FM_Tx();
 }
 
+String getImageType(char key){
+  int lableIndex = int(key) - 49;
+  return lable[lableIndex];
+}
+
+
 void showAll() {
   Serial.println("--Data received from PC2--");
   for (int j = 0; j < 3; j++) {
-    int lableIndex = int(pos[j]) - 49;
-    String imgType = lable[lableIndex];
+    String imgType = getImageType(pos[j]);
     Serial.println(String(j + 1) + ". " + imgType + " at " + String(angle[j]) + " degree");
   }
   Serial.println();
 }
 
 void start() {
+  Serial.println("======= start program =======");
   while (state == START) {
-    Serial.print("Press \'s\' for get 3 image types from PC2: ");
+    Serial.print("Press \'s\' to get 3 image types from PC2: ");
     while (!Serial.available());
     char in = Serial.read();
     Serial.println(in);
@@ -82,25 +88,23 @@ void get3DataFromPC2() {
 
 void lastState() {
   while (state == LAST_STATE) {
-    Serial.print("Choose Image ==>");
+    Serial.print("Choose Image ==> ");
 
     for (int i = 0; i < 3; i++) {
       char key = pos[i];
-      int lableIndex = int(key) - 49;
-      String imgType = lable[lableIndex];
-      Serial.print(" *");
-      Serial.print(imgType);
-      Serial.print("(");
+      String imgType = getImageType(key);
+      Serial.print("[");
       Serial.print(key);
-      Serial.print(")");
-      Serial.print("* ");
+      Serial.print("]->");
+      Serial.print(imgType);
+      Serial.print(" ");
     }
-    Serial.println(" (press \'r\' to reset)");
+    Serial.println(" [r]->reset program");
+    Serial.print("Input : ");
     while (!Serial.available());
     char in = Serial.read();
-    Serial.print("Input : ");
     Serial.println(in);
-    if (in == '1' or in == '2' or in == '3' or in == '4' or in == '5' or in == '6' or in == 'r') {
+    if (in == pos[0] or in == pos[1] or in == pos[2] or in == 'r') {
       Serial.print("Sending ");
       Serial.print(in);
       Serial.println(" to PC2...");
@@ -117,10 +121,12 @@ void lastState() {
           break;
         }
         char receive = receiver->receiveFM();
-        if (receive == '1' or receive == '2' or receive == '3' or receive == '4' or receive == '5' or receive == '6') {
+        if (in == pos[0] or in == pos[1] or in == pos[2]) {
           Serial.print("received ");
           Serial.print(receive);
-          Serial.println(" from PC2\n");
+          Serial.println(" from PC2");
+          Serial.println("The image is "+getImageType(receive));
+          Serial.println();
           break;
         }
       }
@@ -129,7 +135,6 @@ void lastState() {
       Serial.println("wrong input please try again!\n");
     }
   }
-
 
 }
 

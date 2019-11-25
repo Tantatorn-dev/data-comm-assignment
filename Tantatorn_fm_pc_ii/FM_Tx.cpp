@@ -27,11 +27,12 @@ void FM_Tx::setVoltage(uint16_t vol)
   Wire.endTransmission();
 }
 
-void FM_Tx::sendFM(char in[]) {
-  int i = 0;
-  while (in[i] != 0)
-  {
-    transmit(in[i++]);
+void FM_Tx::sendFM(char in[], int l) {
+  if (l == 0) {
+    l = strlen(in);
+  }
+  for (int i = 0; i < l; i++) {
+    transmit(in[i]);
   }
   setVoltage(2047);
   delay(200);

@@ -14,7 +14,7 @@ enum STATES
 enum STATES state  = START;
 
 String lable[6] = {"Top", "Bottom", "Left", "Right", "Upper", "Lower"};
-uint8_t angle[3] = { -45, 0, 45};
+int8_t angle[3] = { -45, 0, 45};
 char pos[3];
 uint8_t raw48[48];
 struct Cor16
@@ -22,7 +22,7 @@ struct Cor16
   uint8_t x;
   uint8_t y;
   uint8_t color;
-} cor16s[16];
+} cor16[16];
 
 
 void setup() {
@@ -37,7 +37,6 @@ String getImageType(char key) {
   int lableIndex = int(key) - 49;
   return lable[lableIndex];
 }
-
 
 void showAll() {
   Serial.println("--Data received from PC2--");
@@ -93,6 +92,30 @@ void get3DataFromPC2() {
   }
 }
 
+void showAllPoints(char key) {
+  int indexShow = 0;
+  Serial.println("Display 16 points of an " + getImageType(key) + " image");
+  for (int j = 0; j < 16; j++) {
+    for (int k = 0; k < 3; k++) {
+      Serial.print(String(raw48[indexShow++]));
+      Serial.print(" ");
+    }
+    Serial.println();
+  }
+}
+
+void showStruct(char key) {
+  Serial.println("Display 16 points in struct of an " + getImageType(key) + " image");
+  for (int i = 0; i < 16; i++) {
+    Serial.print("x = ");
+    Serial.print(cor16[i].x);
+    Serial.print(", y = ");
+    Serial.print(cor16[i].y);
+    Serial.print(", color = ");
+    Serial.println(cor16[i].color);
+  }
+
+}
 
 void lastState() {
   while (state == LAST_STATE) {
@@ -124,8 +147,8 @@ void lastState() {
         break;
       }
       uint32_t ti = millis();
-      int index = 0;
-      while (index != 48) {
+      int indexRaw = 0;
+      while (indexRaw != 48) {
         if (millis() - ti > 15000) {
           Serial.println("Time out of 15 seconds");
           memset(raw48, 0, 48);
@@ -133,20 +156,19 @@ void lastState() {
         }
         int temp = receiver->receiveFM();
         if (temp != -1) {
-          raw48[index++] = temp;
+          raw48[indexRaw] = temp;
+          int corIndex = indexRaw / 3;
+          if (indexRaw % 3 == 0) cor16[corIndex].y = temp;
+          else if (indexRaw % 3 == 1)cor16[corIndex].x = temp;
+          else cor16[corIndex].color = temp;
+          indexRaw++;
         }
       }
-      if (index == 48) {
-        int ii = 0;
-        for (int j = 0; j < 16; j++) {
-          for (int k = 0; k < 3; k++) {
-            Serial.print(String(raw48[ii++]));
-            Serial.print(" ");
-          }
-          Serial.println();
-        }
+      if (indexRaw == 48) {
+        showAllPoints(in);
+        showStruct(in);
       } else {
-        Serial.println("data lost");
+        Serial.println("Data lost!! May be something wrong.");
       }
     }
     else {
@@ -154,7 +176,6 @@ void lastState() {
       Serial.println();
     }
   }
-
 }
 
 

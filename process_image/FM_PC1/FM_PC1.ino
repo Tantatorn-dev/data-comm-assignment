@@ -14,9 +14,9 @@ enum STATES
 enum STATES state  = START;
 
 String lable[6] = {"Top", "Bottom", "Left", "Right", "Upper", "Lower"};
-int angle[3] = { -45, 0, 45};
+uint8_t angle[3] = { -45, 0, 45};
 char pos[3];
-
+uint8_t raw48[48];
 struct Cor16
 {
   uint8_t x;
@@ -72,12 +72,12 @@ void get3DataFromPC2() {
   Serial.println("Getting 3 data from PC2...");
   uint32_t t = millis();
   int i = 0;
-  while (i != 3) {
-    char receive = receiver->receiveFM();
-    if (receive != 0) {
-      Serial.print(receive);
+  while (i < 3) {
+    int receive = receiver->receiveFM();
+    if (receive != -1) {
+      Serial.print(char(receive));
       Serial.print(" ");
-      pos[i++] = receive;
+      pos[i++] = char(receive);
       if (i == 3) {
         Serial.println();
         showAll();
@@ -85,8 +85,8 @@ void get3DataFromPC2() {
         delay(300);
       }
     }
-    if (millis() - t > 15000) {
-      Serial.println("Time out of 15 seconds");
+    if (millis() - t > 10000) {
+      Serial.println("Time out of 10 seconds");
       state = START;
       break;
     }
@@ -124,20 +124,29 @@ void lastState() {
         break;
       }
       uint32_t ti = millis();
-      while (true) {
-        if (millis() - ti > 5000) {
-          Serial.println("Time out of 5 seconds");
+      int index = 0;
+      while (index != 48) {
+        if (millis() - ti > 15000) {
+          Serial.println("Time out of 15 seconds");
+          memset(raw48, 0, 48);
           break;
         }
-        char receive = receiver->receiveFM();
-        if (in == pos[0] or in == pos[1] or in == pos[2]) {
-          Serial.print("received ");
-          Serial.print(receive);
-          Serial.println(" from PC2");
-          Serial.println("The image is " + getImageType(receive));
+        int temp = receiver->receiveFM();
+        if (temp != -1) {
+          raw48[index++] = temp;
+        }
+      }
+      if (index == 48) {
+        int ii = 0;
+        for (int j = 0; j < 16; j++) {
+          for (int k = 0; k < 3; k++) {
+            Serial.print(String(raw48[ii++]));
+            Serial.print(" ");
+          }
           Serial.println();
-          break;
         }
+      } else {
+        Serial.println("data lost");
       }
     }
     else {

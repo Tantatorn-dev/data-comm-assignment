@@ -53,12 +53,13 @@ void loop()
       for (int i = 0; i < 3; i++)
       {
         if (dataIn == pos[i]) {
-          char dataIn2;
-          if     (i == 0) dataIn2 = captureAt('l');
-          else if (i == 1) dataIn2 = captureAt('m');
-          else if (i == 2) dataIn2 = captureAt('r');
+          char dataIn2[48];
+          if     (i == 0) captureColorAt('l', dataIn2);
+          else if (i == 1) captureColorAt('m', dataIn2);
+          else if (i == 2) captureColorAt('r', dataIn2);
 
-          transmitter->sendFM(dataIn2);
+          transmitter->sendFM(dataIn2, 48);
+          Serial.println("D send Fin");
         }
       }
 
@@ -90,27 +91,52 @@ void receiveSerialPC2()
 
 char captureAt(char direction_camera)
 {
-  rotate_camera(direction_camera);
-  return capture();
+  char a = '0';
+  while(a == '0') {
+    rotate_camera(direction_camera);
+    
+    Serial.println('c');
+    while (!Serial.available());
+    a =  Serial.read();
+  }
+  return a;
 }
 
-char capture()
+void captureColorAt(char direction_camera, uint8_t out[])
 {
-  while (true)
-  {
-    Serial.println('c');
-    while (!Serial.available())
-      ;
-    char data_pc2 = Serial.read();
-    if (data_pc2 != 0)
-    {
-      return data_pc2;
+  out[0] = 0;
+  while(out[0] == 0) {
+    rotate_camera(direction_camera);
+    
+    Serial.println('x');
+    while (!Serial.available());
+    Serial.print("D read ");
+    out[0] = Serial.read();
+    Serial.print((int)out[0]);
+    Serial.print(" ");
+    if (out[0] == 0) {
+      Serial.println("D con");
+      continue;
     }
+    for (int i = 1; i < 48; i++) {
+      out[i] = Serial.read();
+      Serial.print((int)out[i]);
+      Serial.print(" ");
+    }
+    Serial.println(" ");
   }
 }
 
 void rotate_camera(char direction_camera)
 {
+  if (direction_camera == lastServoPosition) {
+    switch (direction_camera)
+    {
+      case 'l': rotate_camera('m'); break;
+      case 'm': rotate_camera('r'); break;
+      case 'r': rotate_camera('m'); break;
+    }
+  }
   switch (direction_camera)
   {
     case 'l':

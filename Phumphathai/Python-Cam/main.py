@@ -35,17 +35,32 @@ i = 0
 while True:
     while not ser.inWaiting():
         time.sleep(0.2)
-    a = ser.read_until()
-    print("Ser", a.decode('ascii'))
-    Err = True
-    while Err:
-        img, Err = cam.getImg()
-        cam.display(img)
-        if not Err:
-            typeByte = getImageData(img)
-            if typeByte == '0':
-                Err = True
-                continue
-            ser.write(typeByte.encode('ascii'))
-            cam.save(img, 'out/' + str(i) + '.png')
-            i = i+1
+    operation = ser.read_until().decode('ascii')
+    if (operation[0] != 'D'):
+        operation = operation[0]
+        print("Ser", operation, operation == 'c')
+        Err = True
+        while Err:
+            img, Err = cam.getImg()
+            cam.display(img)
+            if not Err:
+                typeByte, cor16 = getImageData(img)
+
+                if operation == 'c':
+                    ser.write(typeByte.encode('ascii'))
+                    print("out for c")
+                elif operation == 'x':
+                    if typeByte != '0':
+                        l = []
+                        for i in range(cor16.shape[0]):
+                            for j in range(cor16.shape[1]):
+                                l.append(cor16[i][j])
+                        ser.write(bytearray(l))
+                    else:
+                        ser.write(bytearray([0]))
+                    print("out for x")
+
+                cam.save(img, 'out/' + str(i) + '.png')
+                i = i+1
+    else:
+        print("Ser Debug", operation)

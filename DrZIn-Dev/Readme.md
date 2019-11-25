@@ -68,6 +68,7 @@ install all folder => ***DrZIn-Dev\CRC_Frame_Lib\Libraries***
 
 --------------------------------
 ```void decryptFrame(uint8_t *buffer, uint8_t *data, uint8_t size);```
+
 | parameter | meaning          | size           |
 | --------- | ---------------- | -------------- |
 | buffer    | destination msg  | sizeof(data)-2 |

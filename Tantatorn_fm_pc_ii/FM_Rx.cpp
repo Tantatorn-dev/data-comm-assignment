@@ -22,7 +22,7 @@ char FM_Rx::receiveFM(unsigned long timeout)
   char data = 0;
   uint8_t bitC = 0;
 
-  while (millis() - start < timeout || startFreq != 0)
+  while (millis() - start < timeout || (startFreq != 0 && micros() - startFreq > 8000))
   {
     int8_t tmpZone = zone(analogRead(A2));
     if (tmpZone != prev)

@@ -24,6 +24,7 @@ void setup()
 // Global variables
 char pos[4] = {0, 0, 0, 0};
 char lastServoPosition = 'a';
+bool cameraError = false;
 
 void loop()
 {
@@ -98,6 +99,9 @@ char captureAt(char direction_camera)
     Serial.println('c');
     while (!Serial.available());
     a =  Serial.read();
+    if(a == '0') {
+      cameraError = true;
+    }
   }
   return a;
 }
@@ -116,6 +120,7 @@ void captureColorAt(char direction_camera, uint8_t out[])
     Serial.print(" ");
     if (out[0] == 0) {
       Serial.println("D con");
+      cameraError = true;
       continue;
     }
     for (int i = 1; i < 48; i++) {
@@ -129,7 +134,8 @@ void captureColorAt(char direction_camera, uint8_t out[])
 
 void rotate_camera(char direction_camera)
 {
-  if (direction_camera == lastServoPosition) {
+  if (cameraError) {
+    cameraError = false;
     switch (direction_camera)
     {
       case 'l': rotate_camera('m'); break;
@@ -158,5 +164,5 @@ void rotate_camera(char direction_camera)
       break;
   }
   lastServoPosition = direction_camera;
-  delay(200);
+  delay(250);
 }

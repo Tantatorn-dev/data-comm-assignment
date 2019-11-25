@@ -11,7 +11,7 @@ FM_Rx::FM_Rx(float freq)
   radio.setFrequency(freq);
 }
 
-char FM_Rx::receiveFM(unsigned long timeout)
+int FM_Rx::receiveFM(unsigned long timeout)
 {
   unsigned long start = millis();
 
@@ -22,7 +22,7 @@ char FM_Rx::receiveFM(unsigned long timeout)
   char data = 0;
   uint8_t bitC = 0;
 
-  while (millis() - start < timeout || startFreq != 0)
+  while (millis() - start < timeout || (startFreq != 0 && micros() - startFreq <= 8000))
   {
     int8_t tmpZone = zone(analogRead(A2));
     if (tmpZone != prev)
@@ -72,7 +72,7 @@ char FM_Rx::receiveFM(unsigned long timeout)
       prev = tmpZone;
     }
   }
-  return 0;
+  return -1;
 }
 
 int8_t FM_Rx::zone(uint16_t val)

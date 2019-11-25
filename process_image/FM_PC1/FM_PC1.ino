@@ -17,6 +17,14 @@ String lable[6] = {"Top", "Bottom", "Left", "Right", "Upper", "Lower"};
 int angle[3] = { -45, 0, 45};
 char pos[3];
 
+struct Cor16
+{
+  uint8_t x;
+  uint8_t y;
+  uint8_t color;
+} cor16s[16];
+
+
 void setup() {
   Serial.begin(115200);
   Serial.flush();
@@ -25,7 +33,7 @@ void setup() {
   transmitter = new FM_Tx();
 }
 
-String getImageType(char key){
+String getImageType(char key) {
   int lableIndex = int(key) - 49;
   return lable[lableIndex];
 }
@@ -109,14 +117,15 @@ void lastState() {
       Serial.print(in);
       Serial.println(" to PC2...");
       transmitter->sendFM(in);
-      if (in == 'r'){
-        Serial.println("reset program\n");
+      if (in == 'r') {
+        Serial.println("reset program");
+        Serial.println();
         state = START;
         break;
       }
       uint32_t ti = millis();
       while (true) {
-        if(millis() - ti > 5000){
+        if (millis() - ti > 5000) {
           Serial.println("Time out of 5 seconds");
           break;
         }
@@ -125,14 +134,15 @@ void lastState() {
           Serial.print("received ");
           Serial.print(receive);
           Serial.println(" from PC2");
-          Serial.println("The image is "+getImageType(receive));
+          Serial.println("The image is " + getImageType(receive));
           Serial.println();
           break;
         }
       }
     }
     else {
-      Serial.println("wrong input please try again!\n");
+      Serial.println("wrong input please try again!");
+      Serial.println();
     }
   }
 

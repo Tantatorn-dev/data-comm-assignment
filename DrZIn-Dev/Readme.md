@@ -104,7 +104,6 @@ void setup()
     Serial.println("Get checksum => " + String(crc.getCheckSum()));
     crc.createCRC(buffer, data, sizeof(data));
     printData(buffer, sizeof(buffer));
-    Serial.println();
     Serial.println("Check Error =>" + String(crc.checkError(buffer, sizeof(buffer))));
     crc.makeFrame(frameBuffer, buffer, sizeof(buffer), flag);
     printData(frameBuffer, sizeof(frameBuffer));

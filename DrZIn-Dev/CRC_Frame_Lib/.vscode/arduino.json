@@ -2,5 +2,5 @@
     "sketch": "example_lib.ino",
     "board": "arduino:avr:nano",
     "configuration": "cpu=atmega328",
-    "port": "COM20"
+    "port": "COM23"
 }

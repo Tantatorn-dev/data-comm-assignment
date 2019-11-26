@@ -24,30 +24,37 @@ void setup()
     Serial.begin(9600);
     for (int i = 0; i < 49; i++)
     {
-        data[i] = i;
+        data[i] = char('a') + i;
     }
+    Serial.print("Original Data => ");
     printData(data, sizeof(data));
 
     Serial.println("CRC => " + String(crc.crc8(data, sizeof(data))));
     Serial.println("Get checksum => " + String(crc.getCheckSum()));
 
+    Serial.print("Data After create msg => ");
     crc.createCRC(buffer, data, sizeof(data));
     printData(buffer, sizeof(buffer));
 
     Serial.println("Check Error =>" + String(crc.checkError(buffer, sizeof(buffer))));
 
+    Serial.print("Data After make Frame => ");
     crc.makeFrame(frameBuffer, buffer, sizeof(buffer), flag);
     printData(frameBuffer, sizeof(frameBuffer));
 
+    Serial.print("Data After decrypt Frame => ");
     crc.decryptFrame(frameDecrypt, frameBuffer, sizeof(frameBuffer));
     printData(frameDecrypt, sizeof(frameDecrypt));
 
+    Serial.print("Data After decrypt CRC => ");
     crc.decryCRC(crcDecrypt, frameDecrypt, sizeof(frameDecrypt));
     printData(crcDecrypt, sizeof(crcDecrypt));
 
+    Serial.print("Data For send => ");
     crc.send(send_buffer, data, sizeof(data), flag);
     printData(send_buffer, sizeof(send_buffer));
 
+    Serial.print("Data After Receive => ");
     crc.receive(receive_buffer, send_buffer, sizeof(send_buffer));
     printData(receive_buffer, sizeof(receive_buffer));
 }

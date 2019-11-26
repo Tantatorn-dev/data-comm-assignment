@@ -1,6 +1,11 @@
-#include "FM_Rx.h"
 #include "FM_Tx.h"
+<<<<<<< Updated upstream
 #include <String.h>
+=======
+#include "FM_Rx.h"
+#include <String.h> 
+#include <CRC_FRAME.h>
+>>>>>>> Stashed changes
 
 FM_Rx *receiver;
 FM_Tx *transmitter;
@@ -173,6 +178,8 @@ void lastState()
       else
       {
         Serial.println("Data lost!! May be something wrong.");
+        Serial.print("raw index = ");
+        Serial.println(rawIndex);
       }
     }
     else

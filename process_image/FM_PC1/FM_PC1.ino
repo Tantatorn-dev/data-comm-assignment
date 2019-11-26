@@ -26,7 +26,7 @@ struct Cor16
 //--- CRC ---//
 CRC_FRAME crc;
 uint8_t rawData[51];
-uint8t_t data[48];
+uint8_t data[48];
 
 void setup()
 {
@@ -145,12 +145,25 @@ void show_raw_data()
     {
       uint8_t index = i * 3 + j + 1;
       Serial.print(rawData[index]);
-      Serial.print(" ")
+      Serial.print(" ");
     }
     Serial.println();
   }
   Serial.println("crc = " + String(rawData[49]));
   Serial.println("tail = " + String(rawData[50]));
+}
+
+void show_data(){
+  for (int i = 0; i < 16; i++)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      uint8_t index = i * 3 + j;
+      Serial.print(data[index]);
+      Serial.print(" ");
+    }
+    Serial.println();
+  }
 }
 
 void send_ack(char in)
@@ -182,7 +195,7 @@ void get_points16(char in)
 
       if (countTimeout == 5)
       {
-        Serial.println("Error");
+        Serial.println("Error please try again");
         receiving = false;
         break;
       }
@@ -202,20 +215,22 @@ void get_points16(char in)
       }
     }
 
-    uint8_t error = 0;
-
+    uint8_t error = crc.receive(data, rawData, sizeof(rawData));
     if (error)
     {
-      Serial.prinln("CRC Error");
+      Serial.println("CRC Error");
       memset(rawData, 0, sizeof(rawData));
+      memset(data, 0, sizeof(data));
       rawIndex = 0;
       send_ack(in);
+      timeout=millis();
     }
     else
     {
       //show_points16(in);
       //show_pics();
       show_raw_data();
+      show_data();
       receiving = false;
     }
   }
@@ -250,12 +265,16 @@ void last_state()
         Serial.println("reset program");
         Serial.println();
         state = START;
-        break;
       }
       else
       {
         get_points16(in);
       }
+    }
+    else if(in == 's')
+    {
+      Serial.println("reset program");
+      Serial.println();
     }
     else
     {

@@ -22,50 +22,51 @@
  * SOFTWARE.
  */
 
- 
-// CPU-specific implementations of helper functions
+//
+// Thanks to:
+// - Catalogue of parametrised CRC algorithms, CRC RevEng
+// http://reveng.sourceforge.net/crc-catalogue/
+//
+// - Danjel McGougan (CRC-Table-Generator)
+//
 
+#include "Arduino.h"
 #if !defined(KINETISK)
-#if !defined(FastCRC_cpu)
-#define FastCRC_cpu
 
-//Reverse byte order (16 bit)
-#if defined(__thumb__)  
-static inline __attribute__((always_inline)) 
-uint32_t REV16( uint32_t value) //ARM-THUMB
+#include "FastCRC.h"
+#include "FastCRC_cpu.h"
+#include "FastCRC_tables.h"
+
+// ================= 8-BIT CRC ===================
+
+/** Constructor
+ */
+FastCRC8::FastCRC8() {}
+
+/** SMBUS CRC
+ * aka CRC-8
+ * @param data Pointer to Data
+ * @param datalen Length of Data
+ * @return CRC value
+ */
+uint8_t FastCRC8::smbus_upd(const uint8_t *data, uint16_t datalen)
 {
-	asm ("rev16 %0, %1" : "=r" (value) : "r" (value) );
-	return(value);
+	uint8_t crc = seed;
+	if (datalen)
+		do
+		{
+			crc = pgm_read_byte(&crc_table_smbus[crc ^ *data]);
+			data++;
+		} while (--datalen);
+	seed = crc;
+	return crc;
 }
-#else
-static inline __attribute__((always_inline)) 
-uint32_t REV16( uint32_t value) //generic
+
+uint8_t FastCRC8::smbus(const uint8_t *data, const uint16_t datalen)
 {
-	return (value >> 8) | ((value & 0xff) << 8);
+	// poly=0x07 init=0x00 refin=false refout=false xorout=0x00 check=0xf4
+	seed = 0x00;
+	return smbus_upd(data, datalen);
 }
-#endif
 
-
-
-
-
-//Reverse byte order (32 bit)
-#if defined(__thumb__) 
-static inline  __attribute__((always_inline))
-uint32_t REV32( uint32_t value) //ARM-THUMB
-{
-	asm ("rev %0, %1" : "=r" (value) : "r" (value) );
-	return(value);
-}
-#else
-static inline  __attribute__((always_inline))
-uint32_t REV32( uint32_t value) //generic
-{
-	value = (value >> 16) | ((value & 0xffff) << 16);
-	return ((value >> 8) & 0xff00ff) | ((value & 0xff00ff) << 8);
-}
-#endif
-
-
-#endif
-#endif
+#endif // #if !defined(KINETISK)

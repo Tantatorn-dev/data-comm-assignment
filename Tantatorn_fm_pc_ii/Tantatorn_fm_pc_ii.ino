@@ -3,11 +3,14 @@
 #include "FM_Tx.h"
 
 #include <Servo.h>
+#include <CRC_FRAME.h>
 Servo servoPan;
 Servo servoTilt;
 
 FM_Rx *receiver;
 FM_Tx *transmitter;
+
+CRC_FRAME crc;
 
 void setup()
 {
@@ -48,26 +51,46 @@ void loop()
   }
   else if (state == LAST_STATE)
   {
-    char dataIn = receiver->receiveFM();
-    if (dataIn != 0)
+    int dataIn = receiver->receiveFM();
+    if (dataIn != -1)
     {
-      for (int i = 0; i < 3; i++)
-      {
-        if (dataIn == pos[i]) {
-          char dataIn2[48];
-          if     (i == 0) captureColorAt('l', dataIn2);
-          else if (i == 1) captureColorAt('m', dataIn2);
-          else if (i == 2) captureColorAt('r', dataIn2);
-
-          transmitter->sendFM(dataIn2, 48);
-          Serial.println("D send Fin");
-        }
-      }
-
       // reset system
       if (dataIn == 'r')
       {
         state = AWAITING_PC1;
+        rotate_camera('r');
+        Serial.println("D reset");
+      } else if (dataIn == 'Z')
+      {
+        // do something
+      } else if ('0' <= dataIn && dataIn <= '6'){
+        uint8_t dataIn2[48];
+        uint8_t dataOut2[51];
+
+        memset(dataIn2, 0, 48);
+        memset(dataOut2, 0, 51);
+        
+        if     (dataIn == pos[0]) captureColorAt('l', dataIn2);
+        else if (dataIn == pos[1]) captureColorAt('m', dataIn2);
+        else if (dataIn == pos[2]) captureColorAt('r', dataIn2);
+
+        crc.send(dataOut2, dataIn2, 48, 2);
+        transmitter->sendFM(dataOut2, 51);
+        Serial.println("D FM send out");
+
+        Serial.print("D in ");
+        for (int i = 0; i < 48; i++) {
+          Serial.print((int)dataIn2[i]);
+          Serial.print(" ");
+        }
+        Serial.println();
+
+        Serial.print("D out ");
+        for (int i = 0; i < 51; i++) {
+          Serial.print((int)dataOut2[i]);
+          Serial.print(" ");
+        }
+        Serial.println();
       }
     }
   }
@@ -95,7 +118,6 @@ char captureAt(char direction_camera)
   char a = '0';
   while(a == '0') {
     rotate_camera(direction_camera);
-    
     Serial.println('c');
     while (!Serial.available());
     a =  Serial.read();
@@ -111,29 +133,25 @@ void captureColorAt(char direction_camera, uint8_t out[])
   out[0] = 0;
   while(out[0] == 0) {
     rotate_camera(direction_camera);
-    
     Serial.println('x');
     while (!Serial.available());
-    Serial.print("D read ");
     out[0] = Serial.read();
-    Serial.print((int)out[0]);
-    Serial.print(" ");
     if (out[0] == 0) {
-      Serial.println("D con");
       cameraError = true;
       continue;
     }
     for (int i = 1; i < 48; i++) {
+      while (!Serial.available());
       out[i] = Serial.read();
-      Serial.print((int)out[i]);
-      Serial.print(" ");
     }
-    Serial.println(" ");
   }
 }
 
 void rotate_camera(char direction_camera)
 {
+  Serial.print("D rc ");
+  Serial.println(direction_camera);
+  
   if (cameraError) {
     cameraError = false;
     switch (direction_camera)

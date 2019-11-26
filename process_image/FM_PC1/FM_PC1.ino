@@ -1,16 +1,10 @@
 #include "FM_Tx.h"
-<<<<<<< Updated upstream
-#include <String.h>
-=======
 #include "FM_Rx.h"
-#include <String.h> 
-#include <CRC_FRAME.h>
->>>>>>> Stashed changes
 
 FM_Rx *receiver;
 FM_Tx *transmitter;
 
-//------ Global Variable -----
+//------ Global Variable ------//
 enum STATES
 {
   START,
@@ -19,7 +13,7 @@ enum STATES
 } state = START;
 
 String lable[6] = {"Top", "Bottom", "Left", "Right", "Upper", "Lower"};
-int8_t angle[3] = {-45, 0, 45};
+int8_t angle[3] = { -45, 0, 45};
 char pos[3];
 struct Cor16
 {
@@ -27,6 +21,10 @@ struct Cor16
   uint8_t y;
   uint8_t color;
 } points16[16];
+
+//--- CRC ---//
+CRC_FRAME crc;
+
 
 void setup()
 {
@@ -43,7 +41,7 @@ String getImageType(char key)
   return lable[lableIndex];
 }
 
-void showAll()
+void showImageTypes()
 {
   Serial.println("-- Data of 3 images received from PC2 --");
   for (int j = 0; j < 3; j++)
@@ -55,6 +53,10 @@ void showAll()
   Serial.println();
 }
 
+
+
+
+//=============== START =================//
 void start()
 {
   Serial.println("======= start program =======");
@@ -94,7 +96,7 @@ void get3ImageData()
       if (index == 3)
       {
         Serial.println();
-        showAll();
+        showImageTypes();
         state = LAST_STATE;
         delay(300);
       }
@@ -108,9 +110,24 @@ void get3ImageData()
   }
 }
 
+void showPics() {
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      uint8_t index = (i*4) + j;
+      uint8_t color = points16[index].color;
+      char buff[10];
+      sprintf(buff, "%5d ", color);
+      Serial.print(buff);
+    }
+    Serial.println();
+  }
+}
+
+
 void showPoints16(char key)
 {
   Serial.println("Display 16 points in struct of an " + getImageType(key) + " image");
+  Serial.println("Description: color(255=white, 0=black)");
   for (int i = 0; i < 16; i++)
   {
     String pointData = "x = " + String(points16[i].x) + ", y = " + String(points16[i].y) + ", color = " + String(points16[i].color);
@@ -140,7 +157,7 @@ void lastState()
     if (in == pos[0] or in == pos[1] or in == pos[2] or in == 'r')
     {
       String sendingStatus = "Sending " + String(in) + " to PC2...";
-      Serial.print(sendingStatus);
+      Serial.println(sendingStatus);
       transmitter->sendFM(in);
       if (in == 'r')
       {
@@ -174,6 +191,7 @@ void lastState()
       if (rawIndex == 48)
       {
         showPoints16(in);
+        showPics();
       }
       else
       {

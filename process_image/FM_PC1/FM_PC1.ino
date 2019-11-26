@@ -1,6 +1,6 @@
-#include "FM_Rx.h"
 #include "FM_Tx.h"
-#include <String.h>
+#include "FM_Rx.h"
+#include <String.h> 
 #include <CRC_FRAME.h>
 
 FM_Rx *receiver;
@@ -198,6 +198,8 @@ void lastState()
       else
       {
         Serial.println("Data lost!! May be something wrong.");
+        Serial.print("raw index = ");
+        Serial.println(rawIndex);
       }
     }
     else

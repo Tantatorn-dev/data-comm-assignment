@@ -11,7 +11,7 @@ FM_Rx::FM_Rx(float freq)
   radio.setFrequency(freq);
 }
 
-char FM_Rx::receiveFM(unsigned long timeout)
+int FM_Rx::receiveFM(unsigned long timeout)
 {
   unsigned long start = millis();
 
@@ -73,7 +73,7 @@ char FM_Rx::receiveFM(unsigned long timeout)
       prev = tmpZone;
     }
   }
-  return 0;
+  return -1;
 }
 
 int8_t FM_Rx::zone(uint16_t val)

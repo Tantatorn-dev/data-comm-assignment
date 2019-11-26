@@ -93,25 +93,35 @@ void receiveSerialPC2()
 char captureAt(char direction_camera)
 {
   char a = '0';
-  while(a == '0') {
+  while (a == '0') {
     rotate_camera(direction_camera);
-    
+
     Serial.println('c');
     while (!Serial.available());
     a =  Serial.read();
-    if(a == '0') {
+    if (a == '0') {
       cameraError = true;
     }
   }
   return a;
 }
 
+bool isReceivedACK() {
+  char dataIn = receiver->receiveFM();
+  if (dataIn == 'A' || dataIn == 'a') {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
 void captureColorAt(char direction_camera, uint8_t out[])
 {
   out[0] = 0;
-  while(out[0] == 0) {
+  while (out[0] == 0) {
     rotate_camera(direction_camera);
-    
+
     Serial.println('x');
     while (!Serial.available());
     Serial.print("D read ");

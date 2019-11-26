@@ -10,7 +10,7 @@ class FM_Tx
   public:
     FM_Tx();
     void sendFM(char data);
-    void sendFM(char in[]);
+    void sendFM(char in[], int l = 0);
 
   private:
     int delay0;

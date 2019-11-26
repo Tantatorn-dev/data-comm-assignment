@@ -51,7 +51,12 @@ void CRC_FRAME::createCRC(uint8_t *buffer, uint8_t *data, uint8_t size)
 
 uint8_t CRC_FRAME::checkError(uint8_t *data, uint8_t size)
 {
-    return this->crc8(data, size);
+    uint8_t checkSum = this->crc8(data, size);
+    if (checkSum == 0)
+    {
+        return 0;
+    }
+    return 1;
 }
 
 void CRC_FRAME::makeFrame(uint8_t *buffer, uint8_t *data, uint8_t size, uint8_t flag)

@@ -4,21 +4,25 @@ import cv2
 import numpy as np
 from my_image import MyImage
 
-def getLatestFile(path):
-    
-    os.chdir(path)
-    files = os.listdir(path)
-    files.sort(key=lambda x: os.path.getmtime(x))
-    return files[-1]
+def get16(img):
+    cor16 = np.array([
+         [25, 20, 0], [25,40, 0], [25, 60, 0], [25, 80, 0],
+        [55, 20, 0], [55,40, 0], [55, 60, 0], [55, 80, 0],
+        [105, 20, 0], [105,40, 0], [105, 60, 0], [105, 80, 0],
+        [135, 20, 0], [135,40, 0], [135, 60, 0], [135, 80, 0],
+        ])
 
-def preProcessImage():
+    pointsLength = cor16.shape[0]
+    for i in range(pointsLength):
+        y = cor16[i][0]
+        x = cor16[i][1]
+        cor16[i][2] = img[y][x]
+    return cor16
 
-    path = "C:\\out"
-    fileName = input("Enter fileName(.jpg): ") + ".jpg"
-    image = cv2.imread((path + "\\" + fileName), 0)
 
+def preProcessImage(image):
     # reduce noise
-    blur = cv2.GaussianBlur(image, (5,5), 0)
+    blur = cv2.GaussianBlur(image, (5, 5), 0)
 
     # mapping useful for low brightness image
     def mapImg(img):
@@ -26,7 +30,7 @@ def preProcessImage():
         rows, cols = img.shape
         newImg = np.zeros((rows, cols), np.uint8)
         for r in range(rows):
-             for c in range(cols):
+            for c in range(cols):
                 newVal = np.uint8(((img[r][c]-np.amin(img)) / scale) * 255)
                 newImg[r][c] = newVal
         return newImg
@@ -40,7 +44,7 @@ def preProcessImage():
     retValV2, thresh24 = cv2.threshold(resize24, 80, 255, cv2.THRESH_BINARY)
 
     # final threshold for 4 x 4 image
-    dim4 = (4,4)
+    dim4 = (4, 4)
     resize4 = cv2.resize(thresh24, dim4)
 
     ret, thresh4 = cv2.threshold(resize4, 150, 255, cv2.THRESH_BINARY)
@@ -64,15 +68,19 @@ def getDictBytes(key):
 
     return dictBytes[key]
 
-def getImageData():
-    print("Processing Image...")
-    img24, img4 = preProcessImage()
-    images = MyImage(img24.shape)
-    listResults, dictResults, predicted = images.predict(img24, np.uint8(0.75 * img24.size))
-    print("image found is ", end="")
-    print(predicted)
-    typeByte = getDictBytes(predicted)
-    print("send back is", typeByte)
-    return typeByte
 
-getImageData()
+def getImageData(image):
+    print("Processing Image...")
+    img24, img4 = preProcessImage(image)
+    images = MyImage(img24.shape)
+    listResults, dictResults, predicted = images.predict(
+        img24, 60)
+    print("image found is ", end="")
+    print(predicted, end=" ")
+    if predicted != "error":
+        print(dictResults[predicted])
+    typeByte = getDictBytes(predicted)
+    print("\nsend back is", typeByte)
+    # get 16 points 
+    cor16 = get16(image)
+    return typeByte, cor16

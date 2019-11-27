@@ -14,7 +14,6 @@ CRC_FRAME crc;
 
 void setup()
 {
-
   Serial.begin(115200);
   Serial.flush();
 
@@ -31,7 +30,6 @@ bool cameraError = false;
 
 void loop()
 {
-
   if (state == AWAITING_PC1)
   {
     // awaiting commands from PC1
@@ -61,45 +59,38 @@ void loop()
     if (dataIn == 2)
     {
       dataIn = receiver->receiveFM();
-      // reset system
       if (dataIn == 'r')
       {
+        // reset system
         state = AWAITING_PC1;
         rotate_camera('r');
         Serial.println("D reset");
-      } else if (dataIn == 'Z')
+      }
+      else if ('1' <= dataIn && dataIn <= '6')
       {
-        // do something
-      } else if ('0' <= dataIn && dataIn <= '6'){
         uint8_t dataIn2[48];
         uint8_t dataOut2[51];
 
         memset(dataIn2, 0, 48);
         memset(dataOut2, 0, 51);
-        
+
         if     (dataIn == pos[0]) captureColorAt('l', dataIn2);
         else if (dataIn == pos[1]) captureColorAt('m', dataIn2);
         else if (dataIn == pos[2]) captureColorAt('r', dataIn2);
 
         crc.send(dataOut2, dataIn2, 48, 2);
         transmitter->sendFM(dataOut2, 51);
-//        Serial.println("D FM send out");
-//
-//        Serial.print("D in ");
-//        for (int i = 0; i < 48; i++) {
-//          Serial.print((int)dataIn2[i]);
-//          Serial.print(" ");
-//        }
-//        Serial.println();
 
         Serial.print("D out ");
-        for (int i = 0; i < 51; i++) {
+        for (int i = 0; i < 51; i++)
+        {
           Serial.print((int)dataOut2[i]);
           Serial.print(" ");
         }
         Serial.println();
-        
-      } else if (dataIn == 's') {
+      }
+      else if (dataIn == 's')
+      {
         state = AWAITING_PC2;
       }
     }
@@ -126,12 +117,14 @@ void receiveSerialPC2()
 char captureAt(char direction_camera)
 {
   char a = '0';
-  while(a == '0') {
+  while (a == '0')
+  {
     rotate_camera(direction_camera);
     Serial.println('c');
     while (!Serial.available());
-    a =  Serial.read();
-    if(a == '0') {
+    a = Serial.read();
+    if (a == '0')
+    {
       cameraError = true;
     }
   }
@@ -141,16 +134,19 @@ char captureAt(char direction_camera)
 void captureColorAt(char direction_camera, uint8_t out[])
 {
   out[0] = 0;
-  while(out[0] == 0) {
+  while (out[0] == 0)
+  {
     rotate_camera(direction_camera);
     Serial.println('x');
     while (!Serial.available());
     out[0] = Serial.read();
-    if (out[0] == 0) {
+    if (out[0] == 0)
+    {
       cameraError = true;
       continue;
     }
-    for (int i = 1; i < 48; i++) {
+    for (int i = 1; i < 48; i++)
+    {
       while (!Serial.available());
       out[i] = Serial.read();
     }
@@ -161,7 +157,7 @@ void rotate_camera(char direction_camera)
 {
   Serial.print("D rc ");
   Serial.println(direction_camera);
-  
+
   if (cameraError) {
     cameraError = false;
     switch (direction_camera)

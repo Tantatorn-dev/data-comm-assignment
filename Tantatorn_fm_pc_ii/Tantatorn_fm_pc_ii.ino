@@ -35,25 +35,32 @@ void loop()
   if (state == AWAITING_PC1)
   {
     // awaiting commands from PC1
-    if (receiver->receiveFM() == 's')
-      state = AWAITING_PC2;
+    int dataIn = receiver->receiveFM();
+    if (dataIn == 2)
+    {
+      dataIn = receiver->receiveFM();
+      if (dataIn == 's') state = AWAITING_PC2;
+    }
   }
   else if (state == AWAITING_PC2)
   {
     // rotate camera and receive values
     receiveSerialPC2();
     state = SENDING_PC1;
+    Serial.println("D Receive PC");
   }
   else if (state == SENDING_PC1)
   {
     transmitter->sendFM(pos);
     state = LAST_STATE;
+    Serial.println("D Send out FM");
   }
   else if (state == LAST_STATE)
   {
     int dataIn = receiver->receiveFM();
-    if (dataIn != -1)
+    if (dataIn == 2)
     {
+      dataIn = receiver->receiveFM();
       // reset system
       if (dataIn == 'r')
       {
@@ -76,14 +83,14 @@ void loop()
 
         crc.send(dataOut2, dataIn2, 48, 2);
         transmitter->sendFM(dataOut2, 51);
-        Serial.println("D FM send out");
-
-        Serial.print("D in ");
-        for (int i = 0; i < 48; i++) {
-          Serial.print((int)dataIn2[i]);
-          Serial.print(" ");
-        }
-        Serial.println();
+//        Serial.println("D FM send out");
+//
+//        Serial.print("D in ");
+//        for (int i = 0; i < 48; i++) {
+//          Serial.print((int)dataIn2[i]);
+//          Serial.print(" ");
+//        }
+//        Serial.println();
 
         Serial.print("D out ");
         for (int i = 0; i < 51; i++) {
@@ -91,6 +98,9 @@ void loop()
           Serial.print(" ");
         }
         Serial.println();
+        
+      } else if (dataIn == 's') {
+        state = AWAITING_PC2;
       }
     }
   }

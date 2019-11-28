@@ -22,7 +22,7 @@ FM_Rx::FM_Rx(float freq)
 int FM_Rx::receiveAck(unsigned long timeout)
 {
   uint8_t buff[1] = {0};
-  int res = receiveFrame(buff, 2, 1);
+  int res = receiveFrame(buff, 2, 1, timeout);
   if (res == 1) {
     if (buff[0] == 'A') {
       return 1; 
@@ -118,7 +118,7 @@ int FM_Rx::receiveFM(unsigned long timeout)
             bitC++;
             if (bitC == 4)
             {
-              // Serial.print((char)data);
+              // Serial.println((char)data);
               if (data != 0)
               {
                 return data;

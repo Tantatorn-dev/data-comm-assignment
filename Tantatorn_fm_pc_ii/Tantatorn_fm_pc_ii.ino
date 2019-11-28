@@ -19,7 +19,7 @@ void setup()
   Serial.begin(115200);
   Serial.flush();
 
-  receiver = new FM_Rx(106.54);
+  receiver = new FM_Rx(107.84);
   transmitter = new FM_Tx();
 
   initServo();
@@ -36,20 +36,26 @@ int sendAndWaitAck(uint8_t *data, uint8_t size, unsigned long timeout)
   memset(dataOut2, 0, size + 3);
   
   crc.send(dataOut2, data, size, 2);
-  transmitter->sendFrame(dataOut2, size);
 
-  return receiver->receiveAck(timeout);
+  int temp = -10;
+  while(temp != 1){
+    transmitter->sendFrame(dataOut2, size);
+    Serial.println("D FM transmit");
+  
+    temp = receiver->receiveAck(timeout);
+  }
+  return temp;
 }
 
 int receiveAndSendAck(uint8_t *buffer, uint8_t maxlen, unsigned long timeout)
 {
   int size = receiver->receiveFrame(buffer, 2, maxlen);
   if (size > 0) {
-    uint8_t data[] = {'A'};
-    uint8_t dataOut2[4];
+    uint8_t data = 'A';
+    uint8_t dataOut2[5];
     memset(dataOut2, 0, 4);
-    
-    crc.send(dataOut2, data, 1, 2);
+    delay(250);
+    crc.send(dataOut2, &data, 1, 2);
     transmitter->sendFrame(dataOut2, 1);
   }
   return size;
@@ -79,7 +85,6 @@ void loop()
     sendAndWaitAck(pos, 3, 2000);
     
     state = LAST_STATE;
-    Serial.println("D Send out FM");
   }
   else if (state == LAST_STATE)
   {
@@ -103,6 +108,7 @@ void loop()
         else if (buff[0] == pos[1]) captureColorAt('m', dataIn2);
         else if (buff[0] == pos[2]) captureColorAt('r', dataIn2);
 
+        
         sendAndWaitAck(dataIn2, 48, 2000);
       }
       else if (buff[0] == 's')
@@ -196,6 +202,7 @@ void rotate_camera(char direction_camera)
       } else if (lastServoPosition == 'r') {
         servoTilt.write(70);
         servoPan.write(105);
+        delay(100);
       }
       break;
     case 'r':

@@ -56,6 +56,7 @@ while True:
                             for j in range(cor16.shape[1]):
                                 l.append(cor16[i][j])
                         ser.write(bytearray(l))
+                        print("Ser out ", l)
                     else:
                         ser.write(bytearray([0]))
                     print("out for x")

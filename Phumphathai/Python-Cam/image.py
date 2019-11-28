@@ -15,8 +15,8 @@ def get16(img):
 
     pointsLength = cor16.shape[0]
     for i in range(pointsLength):
-        y = cor16[i][0]
-        x = cor16[i][1]
+        y = cor16[i][0] - 1
+        x = cor16[i][1] - 1
         cor16[i][2] = img[y][x]
     return cor16
 

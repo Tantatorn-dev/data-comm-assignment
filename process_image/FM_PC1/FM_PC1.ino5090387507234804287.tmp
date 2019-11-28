@@ -38,7 +38,7 @@ void setup() {
 }
 
 
-int sendAndWaitAck(uint8_t *data, uint8_t size, unsigned long timeout)
+int sendAndWaitAck(uint8_t *data, uint8_t size, unsigned long timeout=10000)
 {
   uint8_t dataOut2[size + 3];
   memset(dataOut2, 0, size + 3);
@@ -48,18 +48,19 @@ int sendAndWaitAck(uint8_t *data, uint8_t size, unsigned long timeout)
 
   int temp = -10;
   while(temp != 1){
-    temp = receiver->receiveAck(timeout);
-    if(temp!=1){
-      Serial.println("timeout or error\nretransmitt...");
+    temp = receiver->receiveAck(10000);
+    if(temp==-1){
+      Serial.println("timeout\nretransmitt...");
       transmitter->sendFrame(dataOut2, size);
     }
   }
+
   return temp;
 }
 
-int receiveAndSendAck(uint8_t *buffer, uint8_t maxlen)
+int receiveAndSendAck(uint8_t *buffer, uint8_t maxlen, unsigned long timeout=10000)
 {
-  int size = receiver->receiveFrame(buffer, 2, maxlen);
+  int size = receiver->receiveFrame(buffer, 2, maxlen, timeout);
   if (size > 0) {
     uint8_t data[] = {'A'};
     uint8_t dataOut2[4];
@@ -89,7 +90,7 @@ void show_img_types() {
 void get_image_data3() {
   char startCMD = 's';
   Serial.println("Sending \'s\' to PC2...");
-  int temp = sendAndWaitAck(&startCMD, 1, 2000);
+  int temp = sendAndWaitAck(&startCMD, 1);
   delay(300);
   int size = -10;
   while (size <= 0) {
@@ -201,8 +202,8 @@ void get_points16(char in) {
     if(size == 48){
       for(int i=0; i<size;i++){
         unpackedData[i] = buff[i];
+        show_data();
       }
-      show_data();
       break;
     }else{
       size = receiveAndSendAck(buff, 48);
@@ -229,7 +230,7 @@ void last_state() {
     if (in == pos[0] or in == pos[1] or in == pos[2] or in == 'r') {
       String sendingStatus = "Sending " + String(in) + " to PC2...";
       Serial.println(sendingStatus);
-      sendAndWaitAck(&in, 1, 2000);
+      sendAndWaitAck(&in, 1);
       if (in == 'r') {
         Serial.println("reset program");
         Serial.println();

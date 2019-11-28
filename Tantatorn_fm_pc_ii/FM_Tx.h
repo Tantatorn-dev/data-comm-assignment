@@ -11,6 +11,7 @@ class FM_Tx
     FM_Tx();
     void sendFM(char data);
     void sendFM(char in[], int l = 0);
+    void sendFrame(char in[], int l);
 
   private:
     int delay0;

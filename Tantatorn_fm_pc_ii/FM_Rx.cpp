@@ -30,8 +30,10 @@ int FM_Rx::receiveFrame(uint8_t *buffer, uint8_t startByte, uint8_t maxlen, unsi
   else if (getStart == startByte)
   {
     int size = this->receiveFM(timeout);
-    if (size + 1 > maxlen) {
-      while(size--) this->receiveFM(timeout);
+    if (size > maxlen) {
+      int temp = 0;
+      size++;
+      while(size-- && temp != -1) temp = this->receiveFM(timeout);
       return -3;
     }
     for (int i = 0; i < size + 1; i++)

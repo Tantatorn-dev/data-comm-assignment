@@ -38,7 +38,7 @@ void loop()
     int size = receiver->receiveFrame(buff, 2, 10);
     Serial.print("D A get");
     Serial.println(size);
-    if (size == 1)
+    if (size == 1) {
       if (buff[0] == 's') state = AWAITING_PC2;
     }
   }
@@ -81,9 +81,9 @@ void loop()
         memset(dataIn2, 0, 48);
         memset(dataOut2, 0, 51);
 
-        if     (dataIn == pos[0]) captureColorAt('l', dataIn2);
-        else if (dataIn == pos[1]) captureColorAt('m', dataIn2);
-        else if (dataIn == pos[2]) captureColorAt('r', dataIn2);
+        if      (buff[0] == pos[0]) captureColorAt('l', dataIn2);
+        else if (buff[0] == pos[1]) captureColorAt('m', dataIn2);
+        else if (buff[0] == pos[2]) captureColorAt('r', dataIn2);
 
         crc.send(dataOut2, dataIn2, 48, 2);
         transmitter->sendFM(dataOut2, 51);

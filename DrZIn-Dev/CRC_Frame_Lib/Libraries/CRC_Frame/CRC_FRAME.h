@@ -79,13 +79,13 @@ uint8_t CRC_FRAME::checkError(uint8_t *data, uint8_t size)
 
 void CRC_FRAME::makeFrame(uint8_t *buffer, uint8_t *data, uint8_t size, uint8_t flag)
 {
-    uint8_t idx = 0;
-    buffer[idx] = flag;
-    for (idx = 1; idx < size + 1; idx++)
+    uint8_t idx = 0, start_idx = 0, size_idx = 1;
+    buffer[start_idx] = flag;
+    buffer[size_idx] = size - 1;
+    for (idx = 2; idx < size + 2; idx++)
     {
-        buffer[idx] = data[idx - 1];
+        buffer[idx] = data[idx - 2];
     }
-    buffer[idx] = flag;
 }
 
 void CRC_FRAME::decryptFrame(uint8_t *buffer, uint8_t *data, uint8_t size)
@@ -93,7 +93,7 @@ void CRC_FRAME::decryptFrame(uint8_t *buffer, uint8_t *data, uint8_t size)
     uint8_t idx = 0;
     for (idx = 0; idx < size; idx++)
     {
-        buffer[idx] = data[idx + 1];
+        buffer[idx] = data[idx + 2];
     }
 }
 void CRC_FRAME::decryCRC(uint8_t *buffer, uint8_t *data, uint8_t size)

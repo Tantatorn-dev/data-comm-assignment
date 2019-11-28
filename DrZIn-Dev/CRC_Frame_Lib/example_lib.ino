@@ -2,7 +2,7 @@
 
 CRC_FRAME crc;
 
-uint8_t data[49];
+uint8_t data[5];
 uint8_t buffer[sizeof(data) + 1];
 uint8_t frameBuffer[sizeof(buffer) + 2];
 uint8_t flag = 2;
@@ -21,8 +21,8 @@ void printData(uint8_t *data, uint8_t size)
 }
 void setup()
 {
-    Serial.begin(9600);
-    for (int i = 0; i < 49; i++)
+    Serial.begin(115200);
+    for (int i = 0; i < 5; i++)
     {
         data[i] = char('a') + i;
     }

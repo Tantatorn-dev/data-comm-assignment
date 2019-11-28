@@ -1,11 +1,11 @@
-#include "FM_Rx.h"
 #include "FM_Tx.h"
-#include <String.h>
+#include "FM_Rx.h"
+#include <CRC_FRAME.h>
 
 FM_Rx *receiver;
 FM_Tx *transmitter;
 
-//------ Global Variable -----
+//------ Global Variable ------//
 enum STATES
 {
   START,
@@ -23,6 +23,11 @@ struct Cor16
   uint8_t color;
 } points16[16];
 
+//--- CRC ---//
+CRC_FRAME crc;
+uint8_t rawData[51];
+uint8_t data[48];
+
 void setup()
 {
   Serial.begin(115200);
@@ -32,24 +37,25 @@ void setup()
   transmitter = new FM_Tx();
 }
 
-String getImageType(char key)
+String get_image_type(char key)
 {
   int lableIndex = int(key) - 49;
   return lable[lableIndex];
 }
 
-void showAll()
+void show_img_types()
 {
   Serial.println("-- Data of 3 images received from PC2 --");
   for (int j = 0; j < 3; j++)
   {
-    String imgType = getImageType(pos[j]);
+    String imgType = get_image_type(pos[j]);
     String imgReceive = String(j + 1) + ". " + imgType + " at " + angle[j] + " degree";
     Serial.println(imgReceive);
   }
   Serial.println();
 }
 
+//=============== START =================//
 void start()
 {
   Serial.println("======= start program =======");
@@ -73,7 +79,7 @@ void start()
   }
 }
 
-void get3ImageData()
+void get_image_data3()
 {
   Serial.println("Getting 3 data from PC2...");
   uint32_t timeout = millis();
@@ -89,7 +95,7 @@ void get3ImageData()
       if (index == 3)
       {
         Serial.println();
-        showAll();
+        show_img_types();
         state = LAST_STATE;
         delay(300);
       }
@@ -103,9 +109,26 @@ void get3ImageData()
   }
 }
 
-void showPoints16(char key)
+void show_pics()
 {
-  Serial.println("Display 16 points in struct of an " + getImageType(key) + " image");
+  for (int i = 0; i < 4; i++)
+  {
+    for (int j = 0; j < 4; j++)
+    {
+      uint8_t index = (i * 4) + j;
+      uint8_t color = points16[index].color;
+      char buff[10];
+      sprintf(buff, "%5d ", color);
+      Serial.print(buff);
+    }
+    Serial.println();
+  }
+}
+
+void show_points16(char key)
+{
+  Serial.println("Display 16 points in struct of an " + get_image_type(key) + " image");
+  Serial.println("Description: color(255=white, 0=black)");
   for (int i = 0; i < 16; i++)
   {
     String pointData = "x = " + String(points16[i].x) + ", y = " + String(points16[i].y) + ", color = " + String(points16[i].color);
@@ -113,7 +136,107 @@ void showPoints16(char key)
   }
 }
 
-void lastState()
+void show_raw_data()
+{
+  Serial.println("head = " + String(rawData[0]));
+  for (int i = 0; i < 16; i++)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      uint8_t index = i * 3 + j + 1;
+      Serial.print(rawData[index]);
+      Serial.print(" ");
+    }
+    Serial.println();
+  }
+  Serial.println("crc = " + String(rawData[49]));
+  Serial.println("tail = " + String(rawData[50]));
+}
+
+void show_data(){
+  for (int i = 0; i < 16; i++)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      uint8_t index = i * 3 + j;
+      Serial.print(data[index]);
+      Serial.print(" ");
+    }
+    Serial.println();
+  }
+}
+
+void send_ack(char in)
+{
+  String sendingStatus = "Sending " + String(in) + " to PC2 again...";
+  Serial.println(sendingStatus);
+  transmitter->sendFM(in);
+}
+
+void get_points16(char in)
+{
+  bool receiving = true;
+  uint8_t countTimeout = 0;
+  uint32_t timeout = millis();
+  uint8_t rawIndex = 0;
+  while (receiving)
+  {
+    while (rawIndex < 51)
+    {
+      if (millis() - timeout > 5000)
+      {
+        Serial.println("Time out of 5 seconds");
+        memset(rawData, 0, sizeof(rawData));
+        rawIndex = 0;
+        send_ack(in);
+        countTimeout++;
+        timeout = millis();
+      }
+
+      if (countTimeout == 5)
+      {
+        Serial.println("Error please try again");
+        receiving = false;
+        break;
+      }
+
+      int temp = receiver->receiveFM();
+      if (temp != -1)
+      {
+        // int pIndex = rawIndex / 3;
+        // if (rawIndex % 3 == 0)
+        //   points16[pIndex].y = temp;
+        // else if (rawIndex % 3 == 1)
+        //   points16[pIndex].x = temp;
+        // else
+        //   points16[pIndex].color = temp;
+        rawData[rawIndex] = temp;
+        rawIndex++;
+      }
+    }
+
+    uint8_t error = crc.receive(data, rawData, sizeof(rawData));
+    if (error)
+    {
+      Serial.println("CRC Error");
+      memset(rawData, 0, sizeof(rawData));
+      memset(data, 0, sizeof(data));
+      rawIndex = 0;
+      send_ack(in);
+      timeout=millis();
+    }
+    else
+    {
+      //show_points16(in);
+      //show_pics();
+      show_raw_data();
+      show_data();
+      receiving = false;
+    }
+  }
+}
+
+void last_state()
 {
   while (state == LAST_STATE)
   {
@@ -122,7 +245,7 @@ void lastState()
     for (int i = 0; i < 3; i++)
     {
       char key = pos[i];
-      String imgType = getImageType(key);
+      String imgType = get_image_type(key);
       String imgPrint = "[" + String(key) + "]->" + imgType + " ";
       Serial.print(imgPrint);
     }
@@ -135,45 +258,23 @@ void lastState()
     if (in == pos[0] or in == pos[1] or in == pos[2] or in == 'r')
     {
       String sendingStatus = "Sending " + String(in) + " to PC2...";
-      Serial.print(sendingStatus);
+      Serial.println(sendingStatus);
       transmitter->sendFM(in);
       if (in == 'r')
       {
         Serial.println("reset program");
         Serial.println();
         state = START;
-        break;
-      }
-      uint32_t timeout = millis();
-      uint8_t rawIndex = 0;
-      while (rawIndex < 48)
-      {
-        if (millis() - timeout > 10000)
-        {
-          Serial.println("Time out of 10 seconds");
-          break;
-        }
-        int temp = receiver->receiveFM();
-        if (temp != -1)
-        {
-          int pIndex = rawIndex / 3;
-          if (rawIndex % 3 == 0)
-            points16[pIndex].y = temp;
-          else if (rawIndex % 3 == 1)
-            points16[pIndex].x = temp;
-          else
-            points16[pIndex].color = temp;
-          rawIndex++;
-        }
-      }
-      if (rawIndex == 48)
-      {
-        showPoints16(in);
       }
       else
       {
-        Serial.println("Data lost!! May be something wrong.");
+        get_points16(in);
       }
+    }
+    else if(in == 's')
+    {
+      Serial.println("reset program");
+      Serial.println();
     }
     else
     {
@@ -191,10 +292,10 @@ void loop()
   }
   else if (state == GET_3DATA)
   {
-    get3ImageData();
+    get_image_data3();
   }
   else if (state == LAST_STATE)
   {
-    lastState();
+    last_state();
   }
 }

@@ -200,9 +200,12 @@ void get_points16(char in) {
    while(true){
     if(size == 48){
       for(int i=0; i<size;i++){
-        unpackedData[i] = buff[i];
+        unpackedData[i] = buff[i]; 
       }
-      show_data();
+      //show_data();
+      data_to_struct();
+      show_points16(in);
+      show_pics();
       break;
     }else{
       size = receiveAndSendAck(buff, 48);
@@ -223,6 +226,7 @@ void last_state() {
     Serial.println(" [r]->reset program");
     Serial.print("Input : ");
     while (!Serial.available()) {
+      receiveAndSendAck(buff, 48);
     }
     char in = Serial.read();
     Serial.println(in);
@@ -233,6 +237,7 @@ void last_state() {
       if (in == 'r') {
         Serial.println("reset program");
         Serial.println();
+        state = START;
       } else {
         get_points16(in);
       }

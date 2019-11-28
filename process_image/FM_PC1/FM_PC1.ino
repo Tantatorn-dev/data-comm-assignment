@@ -52,6 +52,8 @@ int sendAndWaitAck(uint8_t *data, uint8_t size, unsigned long timeout)
     if(temp!=1){
       Serial.println("timeout or error\nretransmitt...");
       transmitter->sendFrame(dataOut2, size);
+    } else if (temp == 1) {
+      Serial.println("Receive ACK");
     }
   }
   return temp;

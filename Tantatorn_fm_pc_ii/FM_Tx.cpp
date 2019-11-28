@@ -27,6 +27,10 @@ void FM_Tx::setVoltage(uint16_t vol)
   Wire.endTransmission();
 }
 
+void FM_Tx::sendFrame(char in[], int l) {
+  sendFM(in, l + 3);
+}
+
 void FM_Tx::sendFM(char in[], int l) {
   if (l == 0) {
     l = strlen(in);

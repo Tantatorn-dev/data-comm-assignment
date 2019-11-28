@@ -22,6 +22,7 @@ struct Cor16 {
   uint8_t y;
   uint8_t color;
 } points16[16];
+char buff[100];
 
 //--- CRC ---//
 CRC_FRAME crc;
@@ -52,28 +53,32 @@ void show_img_types() {
 }
 
 void get_image_data3() {
+  char startCMD = 's';
+  crc.send(buff, &startCMD, 1, 2);
+  Serial.println("Sending \'s\' to PC2...");
+  transmitter->sendFM(buff, 1);
+  
   Serial.println("Getting 3 data from PC2...");
   uint32_t timeout = millis();
-  int index = 0;
-  while (index < 3) {
-    int receive = receiver->receiveFM();
-    if (receive != -1) {
-      Serial.print(char(receive));
-      Serial.print(" ");
-      pos[index++] = char(receive);
-      if (index == 3) {
-        Serial.println();
-        show_img_types();
-        state = LAST_STATE;
-        delay(300);
-      }
+  int size = -10;
+  while(size <= 0){
+    if(millis() - timeout > 10000){
+      Serial.println("timeout of 10 seconds");
+      return;
     }
-    if (millis() - timeout > 10000) {
-      Serial.println("Time out of 10 seconds");
-      state = START;
-      break;
-    }
+    size = receiver->receiveFrame(buff, 2, 3);
   }
+  if (size == 3) {
+    for (int i = 0; i < 3; i++) {
+      pos[i] = buff[i];
+    }
+    show_img_types();
+    state = LAST_STATE;
+    delay(300);
+  } else {
+    Serial.println("Error data lost");
+  }
+
 }
 
 void show_pics() {
@@ -137,8 +142,8 @@ void data_to_struct() {
 
 void send_ack(char in) {
   char select[2];
-  select[0]=2;
-  select[1]=in;
+  select[0] = 2;
+  select[1] = in;
   String sendingStatus = "Sending " + String(in) + " to PC2 again...";
   Serial.println(sendingStatus);
   transmitter->sendFM(select);
@@ -154,11 +159,6 @@ void start() {
     char in = Serial.read();
     Serial.println(in);
     if (in == 's') {
-      char start_pc2[2];
-      start_pc2[0] = 2;
-      start_pc2[1] = 's';
-      Serial.println("Sending \'s\' to PC2...");
-      transmitter->sendFM(start_pc2);
       state = GET_3DATA;
     } else {
       Serial.println("wrong input please try again!\n");

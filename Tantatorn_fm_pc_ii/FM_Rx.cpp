@@ -15,6 +15,27 @@ FM_Rx::FM_Rx(float freq)
 
 /*
  * return
+ * -6 not ack
+ * -7 size not ack
+ */
+
+int FM_Rx::receiveAck(unsigned long timeout)
+{
+  uint8_t buff[1] = {0};
+  int res = receiveFrame(buff, 2, 1);
+  if (res == 1) {
+    if (buff[0] == 'A') {
+      return 1; 
+    }
+    return -6;
+  } else if (res > 0) {
+    return -7;
+  }
+  return res;
+}
+
+/*
+ * return
  * -1 timeout
  * -2 not start byte
  * -3 size more than maxlen

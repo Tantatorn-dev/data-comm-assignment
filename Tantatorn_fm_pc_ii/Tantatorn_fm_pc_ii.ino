@@ -55,7 +55,7 @@ void loop()
     memset(dataOut2, 0, 6);
     
     crc.send(dataOut2, pos, 3, 2);
-    transmitter->sendFM(dataOut2, 6);
+    transmitter->sendFrame(dataOut2, 3);
     
     state = LAST_STATE;
     Serial.println("D Send out FM");
@@ -86,7 +86,7 @@ void loop()
         else if (buff[0] == pos[2]) captureColorAt('r', dataIn2);
 
         crc.send(dataOut2, dataIn2, 48, 2);
-        transmitter->sendFM(dataOut2, 51);
+        transmitter->sendFrame(dataOut2, 48);
 
         Serial.print("D out ");
         for (int i = 0; i < 51; i++)

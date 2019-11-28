@@ -9,6 +9,44 @@ FM_Rx::FM_Rx(float freq)
 
   Wire.begin();
   radio.setFrequency(freq);
+
+  this->CRC8 = FastCRC8();
+}
+
+/*
+ * return
+ * -1 timeout
+ * -2 not start byte
+ * -3 size more than maxlen
+ * -4 timeout during getdata
+ * -5 crc error
+ */
+
+
+int FM_Rx::receiveFrame(uint8_t *buffer, uint8_t startByte, uint8_t maxlen, unsigned long timeout)
+{
+  int getStart = this->receiveFM(timeout);
+  if (getStart == -1) return -1;
+  else if (getStart == startByte)
+  {
+    int size = this->receiveFM(timeout);
+    if (size + 1 > maxlen) {
+      while(size--) this->receiveFM(timeout);
+      return -3;
+    }
+    for (int i = 0; i < size + 1; i++)
+    {
+      int receive = this->receiveFM(timeout);
+      if (receive == -1) return -4;
+      buffer[i] = receive;
+    }
+    if (CRC8.smbus(buffer, size + 1) != 0)
+    {
+      return -5;
+    }
+    return size;
+  }
+  else return -2;
 }
 
 int FM_Rx::receiveFM(unsigned long timeout)

@@ -12,6 +12,8 @@ FM_Tx *transmitter;
 
 CRC_FRAME crc;
 
+uint8_t buff[10];
+
 void setup()
 {
   Serial.begin(115200);
@@ -33,11 +35,11 @@ void loop()
   if (state == AWAITING_PC1)
   {
     // awaiting commands from PC1
-    int dataIn = receiver->receiveFM();
-    if (dataIn == 2)
-    {
-      dataIn = receiver->receiveFM();
-      if (dataIn == 's') state = AWAITING_PC2;
+    int size = receiver->receiveFrame(buff, 2, 10);
+    Serial.print("D A get");
+    Serial.println(size);
+    if (size == 1)
+      if (buff[0] == 's') state = AWAITING_PC2;
     }
   }
   else if (state == AWAITING_PC2)
@@ -49,24 +51,29 @@ void loop()
   }
   else if (state == SENDING_PC1)
   {
-    transmitter->sendFM(pos);
+    uint8_t dataOut2[6];
+    memset(dataOut2, 0, 6);
+    
+    crc.send(dataOut2, pos, 3, 2);
+    transmitter->sendFM(dataOut2, 6);
+    
     state = LAST_STATE;
     Serial.println("D Send out FM");
   }
   else if (state == LAST_STATE)
   {
-    int dataIn = receiver->receiveFM();
-    if (dataIn == 2)
-    {
-      dataIn = receiver->receiveFM();
-      if (dataIn == 'r')
+    int size = receiver->receiveFrame(buff, 2, 10);
+    Serial.print("D D get");
+    Serial.println(size);
+    if (size > 0) {
+      if (buff[0] == 'r')
       {
         // reset system
         state = AWAITING_PC1;
         rotate_camera('r');
         Serial.println("D reset");
       }
-      else if ('1' <= dataIn && dataIn <= '6')
+      else if ('1' <= buff[0] && buff[0] <= '6')
       {
         uint8_t dataIn2[48];
         uint8_t dataOut2[51];
@@ -89,7 +96,7 @@ void loop()
         }
         Serial.println();
       }
-      else if (dataIn == 's')
+      else if (buff[0] == 's')
       {
         state = AWAITING_PC2;
       }

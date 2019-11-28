@@ -30,12 +30,37 @@ char pos[4] = {0, 0, 0, 0};
 char lastServoPosition = 'a';
 bool cameraError = false;
 
+int sendAndWaitAck(uint8_t *data, uint8_t size, unsigned long timeout)
+{
+  uint8_t dataOut2[size + 3];
+  memset(dataOut2, 0, size + 3);
+  
+  crc.send(dataOut2, data, size, 2);
+  transmitter->sendFrame(dataOut2, size);
+
+  return receiver->receiveAck(timeout);
+}
+
+int receiveAndSendAck(uint8_t *buffer, uint8_t maxlen, unsigned long timeout)
+{
+  int size = receiver->receiveFrame(buffer, 2, maxlen);
+  if (size > 0) {
+    uint8_t data[] = {'A'};
+    uint8_t dataOut2[4];
+    memset(dataOut2, 0, 4);
+    
+    crc.send(dataOut2, data, 1, 2);
+    transmitter->sendFrame(dataOut2, 1);
+  }
+  return size;
+}
+
 void loop()
 {
   if (state == AWAITING_PC1)
   {
     // awaiting commands from PC1
-    int size = receiver->receiveFrame(buff, 2, 10);
+    int size = receiveAndSendAck(buff, 10, 2000);
     Serial.print("D A get");
     Serial.println(size);
     if (size == 1) {
@@ -51,18 +76,14 @@ void loop()
   }
   else if (state == SENDING_PC1)
   {
-    uint8_t dataOut2[6];
-    memset(dataOut2, 0, 6);
-    
-    crc.send(dataOut2, pos, 3, 2);
-    transmitter->sendFrame(dataOut2, 3);
+    sendAndWaitAck(pos, 3, 2000);
     
     state = LAST_STATE;
     Serial.println("D Send out FM");
   }
   else if (state == LAST_STATE)
   {
-    int size = receiver->receiveFrame(buff, 2, 10);
+    int size = receiveAndSendAck(buff, 10, 2000);
     Serial.print("D D get");
     Serial.println(size);
     if (size > 0) {
@@ -76,25 +97,13 @@ void loop()
       else if ('1' <= buff[0] && buff[0] <= '6')
       {
         uint8_t dataIn2[48];
-        uint8_t dataOut2[51];
-
         memset(dataIn2, 0, 48);
-        memset(dataOut2, 0, 51);
 
         if      (buff[0] == pos[0]) captureColorAt('l', dataIn2);
         else if (buff[0] == pos[1]) captureColorAt('m', dataIn2);
         else if (buff[0] == pos[2]) captureColorAt('r', dataIn2);
 
-        crc.send(dataOut2, dataIn2, 48, 2);
-        transmitter->sendFrame(dataOut2, 48);
-
-        Serial.print("D out ");
-        for (int i = 0; i < 51; i++)
-        {
-          Serial.print((int)dataOut2[i]);
-          Serial.print(" ");
-        }
-        Serial.println();
+        sendAndWaitAck(dataIn2, 48, 2000);
       }
       else if (buff[0] == 's')
       {
